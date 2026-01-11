@@ -1,5 +1,6 @@
 
 using wandaAPI.Repositories;
+using wandaAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("wandaDb");
@@ -9,7 +10,7 @@ var connectionString = builder.Configuration.GetConnectionString("wandaDb");
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 //Services
 
-
+builder.Services.AddScoped<IUserService, UserService>();
 // Add services to the container.
 
 builder.Services.AddControllers();

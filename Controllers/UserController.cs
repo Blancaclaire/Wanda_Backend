@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using wandaAPI.Repositories;
+using wandaAPI.Services;
 
 
 namespace wandaAPI.Controllers
@@ -9,12 +10,12 @@ namespace wandaAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
 
-        public UserController(IUserRepository userRepository, IConfiguration configuration)
+        public UserController(IUserService userService, IConfiguration configuration)
         {
-            _userRepository = userRepository;
+            _userService = userService;
             _configuration = configuration;
         }
 
@@ -23,7 +24,7 @@ namespace wandaAPI.Controllers
 
         {
 
-            var Users = await _userRepository.GetAllAsync();
+            var Users = await _userService.GetAllAsync();
             return Ok(Users);
 
         }
@@ -33,7 +34,7 @@ namespace wandaAPI.Controllers
         {
             try
             {
-                var User = await _userRepository.GetByIdAsync(id);
+                var User = await _userService.GetByIdAsync(id);
                 return Ok(User);
             }
 
@@ -44,11 +45,11 @@ namespace wandaAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser([FromBody] User user1)
+        public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO user1)
         {
             try
             {
-                await _userRepository.AddAsync(user1);
+                await _userService.AddAsync(user1);
                 return Ok("User creado exitosamente");
             }
             catch (InvalidOperationException ex)
@@ -58,24 +59,20 @@ namespace wandaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] User updatedUser)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDTO updatedUser)
         {
 
             if (id <= 0) return BadRequest("El ID no es válido");
 
             try
             {
-                var existingUser = await _userRepository.GetByIdAsync(id);
+                var existingUser = await _userService.GetByIdAsync(id);
                 if (existingUser == null)
                 {
                     return NotFound();
                 }
 
-                existingUser.Name = updatedUser.Name;
-                existingUser.Email = updatedUser.Email;
-                existingUser.Password = updatedUser.Password;
-
-                await _userRepository.UpdateAsync(existingUser);
+                await _userService.UpdateAsync(id, updatedUser);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -94,7 +91,7 @@ namespace wandaAPI.Controllers
 
             try
             {
-                await _userRepository.DeleteAsync(id);
+                await _userService.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
