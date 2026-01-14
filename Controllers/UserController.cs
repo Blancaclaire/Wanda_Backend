@@ -32,25 +32,25 @@ namespace wandaAPI.Controllers
         public async Task<ActionResult<Account>> GetAccountById(int id)
         {
 
-        var account = await _AccountsService.GetByIdAsync(id);
-        if (account == null) return NotFound();
-        return Ok(account);
+            var account = await _AccountsService.GetByIdAsync(id);
+            if (account == null) return NotFound();
+            return Ok(account);
 
-        }       
+        }
 
-       [HttpPost]
-        public async Task<ActionResult> CreateAccount([FromBody] AccountCreateDTO accountDto)
+        [HttpPost]
+        public async Task<ActionResult> CreateAccount([FromBody] AccountsCreateDTO accountDto)
         {
-        try 
-        {
-        var result = await _AccountsService.AddAsync(accountDto);
-        
-        return CreatedAtAction(nameof(GetAccountById), new { id = result.Id }, result);
-        }
-        catch (InvalidOperationException ex)
-        {
-        return BadRequest(ex.Message);
-        }
+            try
+            {
+                var result = await _AccountsService.AddAsync(accountDto);
+
+                return CreatedAtAction(nameof(GetAccountById), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]

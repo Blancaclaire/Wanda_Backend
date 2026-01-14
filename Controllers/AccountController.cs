@@ -1,106 +1,96 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
-using wandaAPI.Repositories;
 using wandaAPI.Services;
-
 
 namespace wandaAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountController : ControllerBase
     {
-        private readonly IAccountsService _AccountsService;
-        private readonly IConfiguration _configuration;
+        private readonly IAccountService _accountService;
 
-        public AccountsController(IAccountsService AccountsService, IConfiguration configuration)
+        public AccountController(IAccountService accountService)
         {
-            _AccountsService = AccountsService;
-            _configuration = configuration;
+            _accountService = accountService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Accounts>>> GetAccounts()
-
+        public async Task<ActionResult<List<Account>>> GetAccounts()
         {
-
-            var Accountss = await _AccountsService.GetAllAsync();
-            return Ok(Accountss);
-
+            var accounts = await _accountService.GetAllAsync();
+            return Ok(accounts);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Accounts>> GetAccountsById(int id)
+        public async Task<ActionResult<Account>> GetAccountById(int id)
         {
-            try
-            {
-                var Accounts = await _AccountsService.GetByIdAsync(id);
-                return Ok(Accounts);
-            }
-
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var account = await _accountService.GetByIdAsync(id);
+            if (account == null) return NotFound("Cuenta no encontrada");
+            return Ok(account);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Accounts>> CreateAccounts([FromBody] AccountsCreateDTO Accounts1)
+        public async Task<ActionResult> CreateAccount([FromBody] CreateAccountDto dto)
         {
-            try
+            var account = new Account
             {
-                await _AccountsService.AddAsync(Accounts1);
-                return Ok("Accounts creado exitosamente");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                Name = dto.Name,
+                AccountType = dto.AccountType,
+                Balance = dto.Balance,
+                WeeklyBudget = dto.WeeklyBudget,
+                MonthlyBudget = dto.MonthlyBudget,
+                AccountPictureUrl = dto.AccountPictureUrl,
+                Password = dto.Password
+            };
+
+            await _accountService.AddAsync(account);
+            return CreatedAtAction(nameof(GetAccountById), new { id = account.AccountId }, account);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAccounts(int id, [FromBody] AccountsUpdateDTO updatedAccounts)
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountDto dto)
         {
-
-            if (id <= 0) return BadRequest("El ID no es válido");
-
             try
             {
-                var existingAccounts = await _AccountsService.GetByIdAsync(id);
-                if (existingAccounts == null)
+                var account = new Account
                 {
-                    return NotFound();
-                }
+                    AccountId = id,
+                    Name = dto.Name,
+                    AccountType = dto.AccountType,
+                    WeeklyBudget = dto.WeeklyBudget,
+                    MonthlyBudget = dto.MonthlyBudget,
+                    AccountPictureUrl = dto.AccountPictureUrl
+                };
 
-                await _AccountsService.UpdateAsync(id, updatedAccounts);
+                await _accountService.UpdateAsync(account);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
             }
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccounts(int id)
+        public async Task<IActionResult> DeleteAccount(int id)
         {
-
             try
             {
-                await _AccountsService.DeleteAsync(id);
+                await _accountService.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-
                 return NotFound(ex.Message);
             }
         }
 
-
+        [HttpPost("seed")]
+        public async Task<IActionResult> InitializeData()
+        {
+            await _accountService.InicializarDatosAsync();
+            return Ok("Datos inicializados correctamente");
+        }
     }
 }
