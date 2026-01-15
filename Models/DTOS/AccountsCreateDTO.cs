@@ -8,5 +8,5 @@ public class CreateAccountDto
     public double WeeklyBudget { get; set; }
     public double MonthlyBudget { get; set; }
     public string AccountPictureUrl { get; set; }
-    public string Password { get; set; }
+
 }

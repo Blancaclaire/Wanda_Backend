@@ -11,6 +11,6 @@ namespace wandaAPI.Services
         Task AddAsync(Account account);
         Task UpdateAsync(Account account);
         Task DeleteAsync(int id);
-        Task InicializarDatosAsync();
+    
     }
 }

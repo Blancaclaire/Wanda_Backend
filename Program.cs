@@ -3,8 +3,7 @@ using wandaAPI.Repositories;
 using wandaAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-//Repositories
+var connectionString = builder.Configuration.GetConnectionString("wandaDb"); 
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -16,19 +15,24 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 
 // Add services to the container.
 
-var connectionString = builder.Configuration.GetConnectionString("wandaDb"); //aqui lo ponemos de normal? 
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-

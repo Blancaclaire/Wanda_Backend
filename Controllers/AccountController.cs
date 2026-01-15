@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using wandaAPI.Repositories;
 using wandaAPI.Services;
 
 namespace wandaAPI.Controllers
@@ -8,63 +9,59 @@ namespace wandaAPI.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService _accountService;
+        private readonly IAccountRepository _accountRepository;
 
-        public AccountController(IAccountService accountService)
+        public AccountController(IAccountRepository accountRepository)
         {
-            _accountService = accountService;
+            _accountRepository = accountRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
-            var accounts = await _accountService.GetAllAsync();
+            var accounts = await _accountRepository.GetAllAsync();
             return Ok(accounts);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccountById(int id)
         {
-            var account = await _accountService.GetByIdAsync(id);
+            var account = await _accountRepository.GetByIdAsync(id);
             if (account == null) return NotFound("Cuenta no encontrada");
             return Ok(account);
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAccount([FromBody] CreateAccountDto dto)
+        public async Task<ActionResult> CreateAccount([FromBody] Account account)
         {
-            var account = new Account
-            {
-                Name = dto.Name,
-                AccountType = dto.AccountType,
-                Balance = dto.Balance,
-                WeeklyBudget = dto.WeeklyBudget,
-                MonthlyBudget = dto.MonthlyBudget,
-                AccountPictureUrl = dto.AccountPictureUrl,
-                Password = dto.Password
-            };
 
-            await _accountService.AddAsync(account);
-            return CreatedAtAction(nameof(GetAccountById), new { id = account.AccountId }, account);
+            await _accountRepository.AddAsync(account);
+            return Ok("Account creado exitosamente");
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountDto dto)
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody] Account updatedAccount)
         {
             try
             {
-                var account = new Account
+                var existingAccount = await _accountRepository.GetByIdAsync(id);
+                if (existingAccount == null)
                 {
-                    AccountId = id,
-                    Name = dto.Name,
-                    AccountType = dto.AccountType,
-                    WeeklyBudget = dto.WeeklyBudget,
-                    MonthlyBudget = dto.MonthlyBudget,
-                    AccountPictureUrl = dto.AccountPictureUrl
-                };
+                    return NotFound($"No se encontró la cuenta con ID {id}");
+                }
 
-                await _accountService.UpdateAsync(account);
+
+                existingAccount.Name = updatedAccount.Name;
+                existingAccount.Account_Type = updatedAccount.Account_Type;
+                existingAccount.Amount = updatedAccount.Amount;
+                existingAccount.Weekly_budget = updatedAccount.Weekly_budget;
+                existingAccount.Monthly_budget = updatedAccount.Monthly_budget;
+                existingAccount.Account_picture_url = updatedAccount.Account_picture_url;
+
+                await _accountRepository.UpdateAsync(existingAccount);
                 return NoContent();
+
+
             }
             catch (KeyNotFoundException ex)
             {
@@ -77,7 +74,7 @@ namespace wandaAPI.Controllers
         {
             try
             {
-                await _accountService.DeleteAsync(id);
+                await _accountRepository.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -86,11 +83,6 @@ namespace wandaAPI.Controllers
             }
         }
 
-        [HttpPost("seed")]
-        public async Task<IActionResult> InitializeData()
-        {
-            await _accountService.InicializarDatosAsync();
-            return Ok("Datos inicializados correctamente");
-        }
+
     }
 }
