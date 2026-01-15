@@ -1,0 +1,139 @@
+
+-- DROP SCHEMA dbo;
+
+CREATE SCHEMA dbo;
+-- wandaDB.dbo.ACCOUNTS definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.ACCOUNTS;
+
+CREATE TABLE wandaDB.dbo.ACCOUNTS (
+	account_id int IDENTITY(1,1) NOT NULL,
+	name nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	account_type nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	amount decimal(18,2) DEFAULT 0.00 NULL,
+	weekly_budget decimal(18,2) NULL,
+	monthly_budget decimal(18,2) NULL,
+	account_picture_url nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	CONSTRAINT PK__ACCOUNTS__46A222CD5E8054A6 PRIMARY KEY (account_id)
+);
+ALTER TABLE wandaDB.dbo.ACCOUNTS WITH NOCHECK ADD CONSTRAINT CK__ACCOUNTS__accoun__32E0915F CHECK (([account_type]='joint' OR [account_type]='personal'));
+
+
+-- wandaDB.dbo.USERS definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.USERS;
+
+CREATE TABLE wandaDB.dbo.USERS (
+	user_id int IDENTITY(1,1) NOT NULL,
+	name nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	email nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	password nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	CONSTRAINT PK__USERS__B9BE370F34CB52F4 PRIMARY KEY (user_id),
+	CONSTRAINT UQ__USERS__AB6E61642A92A3E4 UNIQUE (email)
+);
+
+
+-- wandaDB.dbo.ACCOUNT_USERS definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.ACCOUNT_USERS;
+
+CREATE TABLE wandaDB.dbo.ACCOUNT_USERS (
+	user_id int NOT NULL,
+	account_id int NOT NULL,
+	CONSTRAINT PK__ACCOUNT___7DD41523E3B7E098 PRIMARY KEY (user_id,account_id),
+	CONSTRAINT FK_AccountUsers_Account FOREIGN KEY (account_id) REFERENCES wandaDB.dbo.ACCOUNTS(account_id),
+	CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES wandaDB.dbo.USERS(user_id)
+);
+
+
+-- wandaDB.dbo.CATEGORIES definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.CATEGORIES;
+
+CREATE TABLE wandaDB.dbo.CATEGORIES (
+	category_id int IDENTITY(1,1) NOT NULL,
+	account_id int NULL,
+	name nvarchar(50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	icon_url nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	[type] nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	CONSTRAINT PK__CATEGORI__D54EE9B481E95BAA PRIMARY KEY (category_id),
+	CONSTRAINT FK_Categories_Account FOREIGN KEY (account_id) REFERENCES wandaDB.dbo.ACCOUNTS(account_id)
+);
+ALTER TABLE wandaDB.dbo.CATEGORIES WITH NOCHECK ADD CONSTRAINT CK__CATEGORIES__type__4222D4EF CHECK (([type]='expense' OR [type]='income'));
+
+
+-- wandaDB.dbo.OBJECTIVES definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.OBJECTIVES;
+
+CREATE TABLE wandaDB.dbo.OBJECTIVES (
+	objective_id int IDENTITY(1,1) NOT NULL,
+	account_id int NOT NULL,
+	name nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	target_amount decimal(18,2) NOT NULL,
+	current_ahorro decimal(18,2) DEFAULT 0.00 NULL,
+	deadline date NULL,
+	objetive_picture_url nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	CONSTRAINT PK__OBJECTIV__21116A6603BBCAFD PRIMARY KEY (objective_id),
+	CONSTRAINT FK_Objectives_Account FOREIGN KEY (account_id) REFERENCES wandaDB.dbo.ACCOUNTS(account_id)
+);
+
+
+-- wandaDB.dbo.TRANSACTIONS definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.TRANSACTIONS;
+
+CREATE TABLE wandaDB.dbo.TRANSACTIONS (
+	transaction_id int IDENTITY(1,1) NOT NULL,
+	account_id int NOT NULL,
+	user_id int NOT NULL,
+	category_id int NOT NULL,
+	objective_id int NULL,
+	amount decimal(18,2) NOT NULL,
+	transaction_type nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	concept nvarchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	transaction_date datetime DEFAULT getdate() NULL,
+	isRecurring bit DEFAULT 0 NULL,
+	frequency nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+	end_date date NULL,
+	split_type nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+	CONSTRAINT PK__TRANSACT__85C600AFE96F036A PRIMARY KEY (transaction_id),
+	CONSTRAINT FK_Transactions_Account FOREIGN KEY (account_id) REFERENCES wandaDB.dbo.ACCOUNTS(account_id),
+	CONSTRAINT FK_Transactions_Category FOREIGN KEY (category_id) REFERENCES wandaDB.dbo.CATEGORIES(category_id),
+	CONSTRAINT FK_Transactions_Objective FOREIGN KEY (objective_id) REFERENCES wandaDB.dbo.OBJECTIVES(objective_id),
+	CONSTRAINT FK_Transactions_User FOREIGN KEY (user_id) REFERENCES wandaDB.dbo.USERS(user_id)
+);
+ALTER TABLE wandaDB.dbo.TRANSACTIONS WITH NOCHECK ADD CONSTRAINT CK__TRANSACTI__trans__0F2D40CE CHECK (([transaction_type]='saving' OR [transaction_type]='expense' OR [transaction_type]='income'));
+ALTER TABLE wandaDB.dbo.TRANSACTIONS WITH NOCHECK ADD CONSTRAINT CK__TRANSACTI__frequ__1209AD79 CHECK (([frequency]='annual' OR [frequency]='weekly' OR [frequency]='monthly'));
+ALTER TABLE wandaDB.dbo.TRANSACTIONS WITH NOCHECK ADD CONSTRAINT CK__TRANSACTI__split__12FDD1B2 CHECK (([split_type]='divided' OR [split_type]='contribution' OR [split_type]='individual'));
+
+
+-- wandaDB.dbo.TRANSACTION_SPLITS definition
+
+-- Drop table
+
+-- DROP TABLE wandaDB.dbo.TRANSACTION_SPLITS;
+
+CREATE TABLE wandaDB.dbo.TRANSACTION_SPLITS (
+	split_id int IDENTITY(1,1) NOT NULL,
+	user_id int NOT NULL,
+	transaction_id int NOT NULL,
+	amount_assigned decimal(18,2) NOT NULL,
+	status nvarchar(20) COLLATE SQL_Latin1_General_CP1_CI_AS DEFAULT 'pending' NULL,
+	CONSTRAINT PK__TRANSACT__3C6AD884A9F6BBF2 PRIMARY KEY (split_id),
+	CONSTRAINT FK_Splits_Transaction FOREIGN KEY (transaction_id) REFERENCES wandaDB.dbo.TRANSACTIONS(transaction_id),
+	CONSTRAINT FK_Splits_User FOREIGN KEY (user_id) REFERENCES wandaDB.dbo.USERS(user_id)
+);
+ALTER TABLE wandaDB.dbo.TRANSACTION_SPLITS WITH NOCHECK ADD CONSTRAINT CK__TRANSACTI__statu__22401542 CHECK (([status]='settled' OR [status]='pending'));
