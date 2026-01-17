@@ -6,7 +6,7 @@ namespace wandaAPI.Repositories
     {
         Task<List<User>> GetAllAsync();
         Task<User?> GetByIdAsync(int id);
-        Task AddAsync(User user1);
+        Task<int> AddAsync(User user1);
         Task UpdateAsync(User user1);
         Task DeleteAsync(int id);
         

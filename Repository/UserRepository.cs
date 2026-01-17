@@ -76,7 +76,7 @@ namespace wandaAPI.Repositories
         }
 
 
-        public async Task AddAsync(User user1)
+        public async Task<int> AddAsync(User user1)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -89,7 +89,8 @@ namespace wandaAPI.Repositories
                     command.Parameters.AddWithValue("@email", user1.Email);
                     command.Parameters.AddWithValue("@password", user1.Password);
 
-                    await command.ExecuteNonQueryAsync();
+                    var result = await command.ExecuteScalarAsync();
+                    return Convert.ToInt32(result);
                 }
             }
         }

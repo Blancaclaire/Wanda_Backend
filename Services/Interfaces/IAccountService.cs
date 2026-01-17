@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Models;
 
 namespace wandaAPI.Services
@@ -8,9 +6,10 @@ namespace wandaAPI.Services
     {
         Task<List<Account>> GetAllAsync();
         Task<Account?> GetByIdAsync(int id);
-        Task AddAsync(Account account);
-        Task UpdateAsync(Account account);
+        Task AddPersonalAccountAsync(string userName); //Implementacion en UserService
+        Task AddJointAccountAsync(JointAccountCreateDto dto, int ownerId); //Implementaciion en AccountController
+        Task UpdateAsync(int id, AccountUpdateDto accountDto);
         Task DeleteAsync(int id);
-    
+
     }
 }

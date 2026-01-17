@@ -26,19 +26,10 @@ CREATE TABLE ACCOUNTS (
 CREATE TABLE ACCOUNT_USERS (
     user_id INT NOT NULL,
     account_id INT NOT NULL,
+    role NVARCHAR(20) DEFAULT 'member' CHECK (role IN ('admin', 'member')),
     PRIMARY KEY (user_id, account_id),
     CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
     CONSTRAINT FK_AccountUsers_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id)
-);
-
-
-CREATE TABLE CATEGORIES (
-    category_id INT IDENTITY(1,1) PRIMARY KEY,
-    account_id INT NULL, 
-    name NVARCHAR(50) NOT NULL,
-    icon_url NVARCHAR(MAX) NULL,
-    type NVARCHAR(20) NOT NULL CHECK (type IN ('income', 'expense')),
-    CONSTRAINT FK_Categories_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id)
 );
 
 
@@ -58,7 +49,7 @@ CREATE TABLE TRANSACTIONS (
     transaction_id INT IDENTITY(1,1) PRIMARY KEY,
     account_id INT NOT NULL,
     user_id INT NOT NULL,
-    category_id INT NOT NULL,
+    category NVARCHAR(50) NOT NULL, 
     objective_id INT NULL, 
     amount DECIMAL(18, 2) NOT NULL,
     transaction_type NVARCHAR(20) NOT NULL CHECK (transaction_type IN ('income', 'expense', 'saving')),
@@ -71,8 +62,8 @@ CREATE TABLE TRANSACTIONS (
     
     CONSTRAINT FK_Transactions_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id),
     CONSTRAINT FK_Transactions_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
-    CONSTRAINT FK_Transactions_Category FOREIGN KEY (category_id) REFERENCES CATEGORIES(category_id),
     CONSTRAINT FK_Transactions_Objective FOREIGN KEY (objective_id) REFERENCES OBJECTIVES(objective_id)
+
 );
 
 

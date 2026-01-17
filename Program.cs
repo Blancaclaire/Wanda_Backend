@@ -7,11 +7,12 @@ var connectionString = builder.Configuration.GetConnectionString("wandaDb");
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountUsersRepository, AccountUsersRepository>();
 
 //Services
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
+
 
 // Add services to the container.
 

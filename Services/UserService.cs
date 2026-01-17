@@ -1,6 +1,8 @@
 using Models;
 using wandaAPI.Repositories;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Reflection.Metadata.Ecma335;
+using System.Runtime;
 
 namespace wandaAPI.Services
 {
@@ -8,19 +10,20 @@ namespace wandaAPI.Services
     {
 
         private readonly IUserRepository _userRepository;
+        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountUsersRepository _accountUsersRepository;
 
-
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IAccountRepository accountRepository, IAccountUsersRepository accountUsersRepository)
         {
             _userRepository = userRepository;
+            _accountRepository = accountRepository;
+            _accountUsersRepository = accountUsersRepository;
         }
 
         public async Task<List<User>> GetAllAsync()
         {
 
             var Users = await _userRepository.GetAllAsync();
-
-
             return Users;
 
         }
@@ -38,8 +41,10 @@ namespace wandaAPI.Services
 
         public async Task AddAsync(UserCreateDTO user1)
         {
-            var users = await _userRepository.GetAllAsync();
 
+            //Comprobaciones antes de añadir el user
+
+            var users = await _userRepository.GetAllAsync();
             foreach (var us in users)
             {
                 if (us.Email.Equals(user1.Email))
@@ -53,9 +58,7 @@ namespace wandaAPI.Services
                 throw new InvalidOperationException("La contraseña no puede tener menos de 5 carácteres");
             }
 
-
             var containsMayus = false;
-
             if (user1.Password.Any(char.IsUpper))
             {
                 containsMayus = true;
@@ -73,8 +76,29 @@ namespace wandaAPI.Services
 
             };
 
-            await _userRepository.AddAsync(user);
+            //Añade el nuevo User a la tabla de USERS
+            int userId = await _userRepository.AddAsync(user);
 
+            //Creación automatica de cuenta personal
+            var personalAccount = new Account
+            {
+                Name= user.Name,
+                Account_Type = "personal",
+                Amount = 0
+            };
+            
+            //Añade la nueva account a la tabla de ACCOUNTS
+            int accountId = await _accountRepository.AddAsync(personalAccount);
+
+            var accountUser = new AccountUsers
+            {
+                User_id = userId,
+                Account_id = accountId,
+                Role = "admin"
+            };
+
+            //Añade en la tabla ACCOUNT_USERS el nuevo usuario y su nueva cuenta
+            await _accountUsersRepository.AddAsync(accountUser);
 
         }
 

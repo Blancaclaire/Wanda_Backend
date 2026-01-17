@@ -36,7 +36,7 @@ namespace wandaAPI.Controllers
         {
 
             await _accountRepository.AddAsync(account);
-            return Ok("Account creado exitosamente");
+            return Ok("Account creada exitosamente");
         }
 
         [HttpPut("{id}")]

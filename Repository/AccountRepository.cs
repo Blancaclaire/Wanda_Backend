@@ -36,7 +36,7 @@ namespace wandaAPI.Repositories
                                 Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
                                 Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-                                Account_picture_url =  reader.IsDBNull(6) ? null : reader.GetString(6)
+                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
                             };
 
                             Accounts.Add(Account);
@@ -72,7 +72,7 @@ namespace wandaAPI.Repositories
                                 Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
                                 Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-                                Account_picture_url =  reader.IsDBNull(6) ? null : reader.GetString(6)
+                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
                             };
                         }
                     }
@@ -82,7 +82,7 @@ namespace wandaAPI.Repositories
         }
 
 
-        public async Task AddAsync(Account Account1)
+        public async Task<int> AddAsync(Account Account1)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -98,7 +98,10 @@ namespace wandaAPI.Repositories
                     command.Parameters.AddWithValue("@monthly_budget", Account1.Monthly_budget);
                     command.Parameters.AddWithValue("@account_picture_url", Account1.Account_picture_url);
 
-                    await command.ExecuteNonQueryAsync();
+
+                    // ExecuteScalar devuelve la primera columna de la primera fila->id
+                    var result = await command.ExecuteScalarAsync();
+                    return Convert.ToInt32(result);
                 }
             }
         }
