@@ -82,7 +82,7 @@ namespace wandaAPI.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "INSERT INTO USERS (name, email, password) VALUES (@name, @email, @password);";
+                string query = "INSERT INTO USERS (name, email, password) VALUES (@name, @email, @password); SELECT SCOPE_IDENTITY();";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@name", user1.Name);
