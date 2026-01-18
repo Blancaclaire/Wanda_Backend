@@ -21,7 +21,7 @@ namespace wandaAPI.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT account_id, name, account_type, amount, weekly_budget, monthly_budget, account_picture_url FROM ACCOUNTS";
+                string query = "SELECT account_id, name, account_type, amount, weekly_budget, monthly_budget, account_picture_url, creation_date FROM ACCOUNTS";
                 using (var command = new SqlCommand(query, connection))
                 {
                     using (var reader = await command.ExecuteReaderAsync())
@@ -36,7 +36,8 @@ namespace wandaAPI.Repositories
                                 Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
                                 Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
+                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6),
+                                Creation_date = reader.GetDateTime(7)
                             };
 
                             Accounts.Add(Account);
@@ -55,7 +56,7 @@ namespace wandaAPI.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT account_id, name, account_type, amount, weekly_budget, monthly_budget, account_picture_url FROM ACCOUNTS WHERE account_id = @account_id";
+                string query = "SELECT account_id, name, account_type, amount, weekly_budget, monthly_budget, account_picture_url, creation_date FROM ACCOUNTS WHERE account_id = @account_id";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@account_id", id);
@@ -72,7 +73,8 @@ namespace wandaAPI.Repositories
                                 Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
                                 Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
+                                Account_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6),
+                                Creation_date = reader.GetDateTime(7)
                             };
                         }
                     }

@@ -36,7 +36,7 @@ namespace wandaAPI.Services
 
             var accountAdmin = new AccountUsers
             {
-                User_id = dto.OwnerId,
+                User_id = ownerId,
                 Account_id = accountId,
                 Role = AccountUsers.UserRole.admin
             };
@@ -48,7 +48,7 @@ namespace wandaAPI.Services
             //mete al resto de users que no son el dueño como members en ACCOUNTS_USERS
             foreach (var memberId in dto.Member_Ids)
             {
-                if (memberId != dto.OwnerId)
+                if (memberId != ownerId)
                 {
                     var accountMember = new AccountUsers
                     {

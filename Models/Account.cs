@@ -12,12 +12,14 @@ public class Account
     public double Monthly_budget { get; set; }
     public string Account_picture_url { get; set; }
 
+    public DateTime Creation_date { get; set; }
+
     public Account()
     {
 
     }
 
-    public Account(int account_id, string name, AccountType account_type, double amount, double weekly_budget, double monthly_budget, string account_picture_url)
+    public Account(int account_id, string name, AccountType account_type, double amount, double weekly_budget, double monthly_budget, string account_picture_url, DateTime creation_date)
     {
         Account_id = account_id;
         Name = name;
@@ -26,6 +28,7 @@ public class Account
         Weekly_budget = weekly_budget;
         Monthly_budget = monthly_budget;
         Account_picture_url = account_picture_url;
+        Creation_date = creation_date;
         
     }
 
