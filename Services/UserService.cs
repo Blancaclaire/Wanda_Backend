@@ -10,13 +10,13 @@ namespace wandaAPI.Services
     {
 
         private readonly IUserRepository _userRepository;
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountService _accountService;
         private readonly IAccountUsersRepository _accountUsersRepository;
 
-        public UserService(IUserRepository userRepository, IAccountRepository accountRepository, IAccountUsersRepository accountUsersRepository)
+        public UserService(IUserRepository userRepository, IAccountService accountService, IAccountUsersRepository accountUsersRepository)
         {
             _userRepository = userRepository;
-            _accountRepository = accountRepository;
+            _accountService = accountService;
             _accountUsersRepository = accountUsersRepository;
         }
 
@@ -79,22 +79,14 @@ namespace wandaAPI.Services
             //Añade el nuevo User a la tabla de USERS
             int userId = await _userRepository.AddAsync(user);
 
-            //Creación automatica de cuenta personal
-            var personalAccount = new Account
-            {
-                Name= user.Name,
-                Account_Type = "personal",
-                Amount = 0
-            };
-            
-            //Añade la nueva account a la tabla de ACCOUNTS
-            int accountId = await _accountRepository.AddAsync(personalAccount);
+            //Añade la nueva Account a partir de User a la tabla de ACCOUNTS
+            int accountId = await _accountService.AddPersonalAccountAsync(user.Name);
 
             var accountUser = new AccountUsers
             {
                 User_id = userId,
                 Account_id = accountId,
-                Role = "admin"
+                Role = AccountUsers.UserRole.admin
             };
 
             //Añade en la tabla ACCOUNT_USERS el nuevo usuario y su nueva cuenta
@@ -123,7 +115,7 @@ namespace wandaAPI.Services
                     throw new InvalidOperationException("La contraseña no contine al menos una mayuscula");
                 }
 
-                var UserExistente = await GetByIdAsync(id);
+                var UserExistente = await _userRepository.GetByIdAsync(id);
 
                 UserExistente.Name = user1.Name;
                 UserExistente.Password = user1.Password;
@@ -145,7 +137,7 @@ namespace wandaAPI.Services
 
         public async Task DeleteAsync(int id)
         {
-            var user1 = await GetByIdAsync(id);
+            var user1 = await _userRepository.GetByIdAsync(id);
             if (user1 == null)
             {
                 throw new KeyNotFoundException("El User no existe");

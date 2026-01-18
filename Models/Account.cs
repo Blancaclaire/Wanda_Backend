@@ -2,9 +2,11 @@ namespace Models;
 
 public class Account
 {
+
+    public enum AccountType { personal, joint }
     public int Account_id { get; set; }
     public string Name { get; set; }
-    public string Account_Type { get; set; }
+    public AccountType Account_Type { get; set; }
     public double Amount { get; set; }
     public double Weekly_budget { get; set; }
     public double Monthly_budget { get; set; }
@@ -15,7 +17,7 @@ public class Account
 
     }
 
-    public Account(int account_id, string name, string account_type, double amount, double weekly_budget, double monthly_budget, string account_picture_url)
+    public Account(int account_id, string name, AccountType account_type, double amount, double weekly_budget, double monthly_budget, string account_picture_url)
     {
         Account_id = account_id;
         Name = name;

@@ -9,56 +9,51 @@ namespace wandaAPI.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountRepository _accountRepository;
+        private readonly IAccountService _accountService;
 
-        public AccountController(IAccountRepository accountRepository)
+        public AccountController(IAccountService accountRepository)
         {
-            _accountRepository = accountRepository;
+            _accountService = accountRepository;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Account>>> GetAccounts()
         {
-            var accounts = await _accountRepository.GetAllAsync();
+            var accounts = await _accountService.GetAllAsync();
             return Ok(accounts);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccountById(int id)
         {
-            var account = await _accountRepository.GetByIdAsync(id);
+            var account = await _accountService.GetByIdAsync(id);
             if (account == null) return NotFound("Cuenta no encontrada");
             return Ok(account);
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateAccount([FromBody] Account account)
+        public async Task<ActionResult> CreateAccount([FromBody] JointAccountCreateDto account, int ownerId)
         {
 
-            await _accountRepository.AddAsync(account);
-            return Ok("Account creada exitosamente");
+            await _accountService.AddJointAccountAsync(account, ownerId);
+            return Ok("Joint Account creada exitosamente");
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAccount(int id, [FromBody] Account updatedAccount)
+        public async Task<IActionResult> UpdateAccount(int id, [FromBody]  AccountUpdateDto accountDto)
         {
             try
             {
-                var existingAccount = await _accountRepository.GetByIdAsync(id);
+
+                if (id <= 0) return BadRequest("El ID no es válido");
+
+                var existingAccount = await _accountService.GetByIdAsync(id);
                 if (existingAccount == null)
                 {
-                    return NotFound($"No se encontró la cuenta con ID {id}");
+                    return NotFound();
                 }
 
-
-                existingAccount.Name = updatedAccount.Name;
-                existingAccount.Account_Type = updatedAccount.Account_Type;
-                existingAccount.Amount = updatedAccount.Amount;
-                existingAccount.Weekly_budget = updatedAccount.Weekly_budget;
-                existingAccount.Monthly_budget = updatedAccount.Monthly_budget;
-                existingAccount.Account_picture_url = updatedAccount.Account_picture_url;
-
-                await _accountRepository.UpdateAsync(existingAccount);
+                await _accountService.UpdateAsync(id, accountDto);
                 return NoContent();
 
 
@@ -67,6 +62,10 @@ namespace wandaAPI.Controllers
             {
                 return NotFound(ex.Message);
             }
+             catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpDelete("{id}")]
@@ -74,7 +73,7 @@ namespace wandaAPI.Controllers
         {
             try
             {
-                await _accountRepository.DeleteAsync(id);
+                await _accountService.DeleteAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

@@ -25,7 +25,7 @@ namespace wandaAPI.Repositories
                 {
                     command.Parameters.AddWithValue("@user_id", accountUsers.User_id);
                     command.Parameters.AddWithValue("@account_id", accountUsers.Account_id);
-                    command.Parameters.AddWithValue("@role", accountUsers.Role);
+                    command.Parameters.AddWithValue("@role", accountUsers.Role.ToString());
 
                     await command.ExecuteNonQueryAsync();
                     
