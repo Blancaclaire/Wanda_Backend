@@ -14,10 +14,10 @@ public class ObjectiveUpdateDto
 
     public ObjectiveUpdateDto()
     {
-        
+
     }
 
-    public ObjectiveUpdateDto(string name, double amount, double weekly_budget, double monthly_budget, string account_picture_url)
+    public ObjectiveUpdateDto(string name, double amount, double monthly_budget, double weekly_budget, string account_picture_url)
     {
         Name = name;
         Amount = amount;

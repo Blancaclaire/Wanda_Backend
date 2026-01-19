@@ -11,7 +11,7 @@ namespace wandaAPI.Controllers
     {
         private readonly IAccountService _accountService;
 
-        public AccountController(IAccountService accountRepository)
+        public AccountController(IAccountService accountRepository) //error de nombre, public AccountController(IAccountService accountService) 
         {
             _accountService = accountRepository;
         }

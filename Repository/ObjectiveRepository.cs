@@ -1,5 +1,6 @@
 using Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Identity.Client;
 
 namespace wandaAPI.Repositories
 {
@@ -13,78 +14,64 @@ namespace wandaAPI.Repositories
         }
 
 
-        public async Task<List<Objective>> GetAllAsync()
+        public async Task<List<Objective>> GetByAccountIdAsync(int accountId)
         {
             var Objectives = new List<Objective>();
 
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-            //     string query = "SELECT Objective_id, name, Objective_type, amount, weekly_budget, monthly_budget, Objective_picture_url, creation_date FROM ObjectiveS";
-            //     using (var command = new SqlCommand(query, connection))
-            //     {
-            //         using (var reader = await command.ExecuteReaderAsync())
-            //         {
-            //             while (await reader.ReadAsync())
-            //             {
-            //                 var Objective = new Objective
-            //                 {
-            //                     Objective_id = reader.GetInt32(0),
-            //                     Name = reader.GetString(1),
-            //                     Objective_Type = Enum.Parse<Objective.ObjectiveType>(reader.GetString(2), ignoreCase: true),
-            //                     Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
-            //                     Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
-            //                     Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-            //                     Objective_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6),
-            //                     Creation_date = reader.GetDateTime(7)
-            //                 };
-
-            //                 Objectives.Add(Objective);
-            //             }
-            //         }
-            //     }
-            // }
+                string query = "SELECT objective_id, account_id, name, target_amount, current_save, deadline, objective_picture_url FROM OBJECTIVES WHERE account_id = @account_id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@account_id", accountId);
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            var Objective = new Objective
+                            {
+                                Objective_id = reader.GetInt32(0),
+                                Account_id = reader.GetInt32(1),
+                                Name = reader.GetString(2),
+                                Target_amount = reader.GetDouble(3),
+                                Current_save = reader.GetDouble(4),
+                                Deadline = reader.GetDateTime(5),
+                                Objective_picture_url = reader.GetString(6)
+                            };
+                            Objectives.Add(Objective);
+                        }
+                    }
+                }
+            }
             return Objectives;
         }
 
-        public async Task<Objective?> GetByIdAsync(int id)
+        public async Task ObjectiveEdit(Objective objective)
         {
-            Objective Objective1 = null;
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync();
+                string query = "UPDATE Objectives SET name = @name, target_amount = @target_amount, current_save = @current_save, deadline = @deadline, objective_picture_url = @url WHERE Objective_id = @id";
 
-            //     string query = "SELECT Objective_id, name, Objective_type, amount, weekly_budget, monthly_budget, Objective_picture_url, creation_date FROM ObjectiveS WHERE Objective_id = @Objective_id";
-            //     using (var command = new SqlCommand(query, connection))
-            //     {
-            //         command.Parameters.AddWithValue("@Objective_id", id);
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@id", objective.Objective_id);
+                    command.Parameters.AddWithValue("@name", objective.Name);
+                    command.Parameters.AddWithValue("@target_amount", objective.Target_amount);
+                    command.Parameters.AddWithValue("@current_save", objective.Current_save);
+                    command.Parameters.AddWithValue("@deadline", objective.Deadline);
+                    command.Parameters.AddWithValue("@url", (object)objective.Objective_picture_url ?? DBNull.Value);//puede ser null
 
-            //         using (var reader = await command.ExecuteReaderAsync())
-            //         {
-            //             if (await reader.ReadAsync())
-            //             {
-            //                 Objective1 = new Objective
-            //                 {
-            //                     Objective_id = reader.GetInt32(0),
-            //                     Name = reader.GetString(1),
-            //                     Objective_Type = Enum.Parse<Objective.ObjectiveType>(reader.GetString(2), ignoreCase: true),
-            //                     Amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
-            //                     Weekly_budget = reader.IsDBNull(4) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
-            //                     Monthly_budget = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
-            //                     Objective_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6),
-            //                     Creation_date = reader.GetDateTime(7)
-            //                 };
-            //             }
-            //         }
-            //     }
-            // }
-            return Objective1;
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
         }
 
 
-        public async Task<int> AddAsync(Objective Objective1)
+        public async Task<int> AddAsync(Account account)
         {
             // using (var connection = new SqlConnection(_connectionString))
             // {
@@ -101,14 +88,14 @@ namespace wandaAPI.Repositories
             //         command.Parameters.AddWithValue("@Objective_picture_url", (object)Objective1.Objective_picture_url ?? DBNull.Value);
 
 
-                     // ExecuteScalar devuelve la primera columna de la primera fila->id
-                     var result = await command.ExecuteScalarAsync();
-                     return Convert.ToInt32(result);
+            // ExecuteScalar devuelve la primera columna de la primera fila->id
+            var result = await command.ExecuteScalarAsync();
+            return Convert.ToInt32(result);
             //     }
             // }
         }
 
-        public async Task UpdateAsync(Objective Objective1)
+        public async Task UpdateAsync(Account account)
         {
             // using (var connection = new SqlConnection(_connectionString))
             // {
