@@ -23,7 +23,7 @@ namespace wandaAPI.Controllers
             return Ok(accounts);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{accountId}")]
         public async Task<ActionResult<Account>> GetAccountById(int id)
         {
             var account = await _accountService.GetByIdAsync(id);
@@ -39,7 +39,7 @@ namespace wandaAPI.Controllers
             return Ok("Joint Account creada exitosamente");
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{accountId}")]
         public async Task<IActionResult> UpdateAccount(int id, [FromBody]  AccountUpdateDto accountDto)
         {
             try
@@ -68,7 +68,7 @@ namespace wandaAPI.Controllers
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{accountId}")]
         public async Task<IActionResult> DeleteAccount(int id)
         {
             try
