@@ -1,6 +1,6 @@
 namespace Models;
 
-public class AccountUpdateDto
+public class AddFundsDto
 {
     public string Name { get; set; }
 
@@ -11,10 +11,5 @@ public class AccountUpdateDto
     public double Monthly_budget { get; set; }
     public string Account_picture_url { get; set; }
 
-
-    public AccountUpdateDto()
-    {
-        
-    }
 
 }

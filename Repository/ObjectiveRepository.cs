@@ -49,6 +49,7 @@ namespace wandaAPI.Repositories
         }
 
         public async Task ObjectiveEdit(Objective objective)
+
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -63,7 +64,7 @@ namespace wandaAPI.Repositories
                     command.Parameters.AddWithValue("@target_amount", objective.Target_amount);
                     command.Parameters.AddWithValue("@current_save", objective.Current_save);
                     command.Parameters.AddWithValue("@deadline", objective.Deadline);
-                    command.Parameters.AddWithValue("@url", (object)objective.Objective_picture_url ?? DBNull.Value);//puede ser null
+                    command.Parameters.AddWithValue("@url", objective.Objective_picture_url);
 
                     await command.ExecuteNonQueryAsync();
                 }
@@ -71,67 +72,65 @@ namespace wandaAPI.Repositories
         }
 
 
-        public async Task<int> AddAsync(Account account)
+        public async Task<int> AddAsync(Objective objective)
         {
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-            //     string query = "INSERT INTO ObjectiveS (name, Objective_type, amount, weekly_budget, monthly_budget, Objective_picture_url) VALUES (@name, @Objective_type, @amount, @weekly_budget, @monthly_budget, @Objective_picture_url); SELECT SCOPE_IDENTITY();";
-            //     using (var command = new SqlCommand(query, connection))
-            //     {
-            //         command.Parameters.AddWithValue("@name", Objective1.Name);
-            //         command.Parameters.AddWithValue("@Objective_type", Objective1.Objective_Type.ToString());
-            //         command.Parameters.AddWithValue("@amount", Objective1.Amount);
-            //         command.Parameters.AddWithValue("@weekly_budget", Objective1.Weekly_budget);
-            //         command.Parameters.AddWithValue("@monthly_budget", Objective1.Monthly_budget);
-            //         command.Parameters.AddWithValue("@Objective_picture_url", (object)Objective1.Objective_picture_url ?? DBNull.Value);
+                string query = "INSERT INTO Objective (name, Objective_type, amount, weekly_budget, monthly_budget, Objective_picture_url) VALUES (@name, @Objective_type, @amount, @weekly_budget, @monthly_budget, @Objective_picture_url); SELECT SCOPE_IDENTITY();";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@name", objective.Name);
+                    command.Parameters.AddWithValue("@Objective_type", objective.Name.ToString());
+                    command.Parameters.AddWithValue("@amount", objective.Target_amount);
+                    command.Parameters.AddWithValue("@weekly_budget", objective.Current_save);
+                    command.Parameters.AddWithValue("@monthly_budget", objective.Deadline);
+                    command.Parameters.AddWithValue("@Objective_picture_url", objective.Objective_picture_url);
 
 
-            // ExecuteScalar devuelve la primera columna de la primera fila->id
-            var result = await command.ExecuteScalarAsync();
-            return Convert.ToInt32(result);
-            //     }
-            // }
+                    var result = await command.ExecuteScalarAsync();
+                    return Convert.ToInt32(result);
+                }
+            }
         }
 
-        public async Task UpdateAsync(Account account)
+        public async Task UpdateAsync(Objective objective)
         {
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-            //     string query = "UPDATE ObjectiveS SET name = @name, Objective_type = @Objective_type, amount = @amount, weekly_budget = @weekly_budget, monthly_budget = @monthly_budget, Objective_picture_url = @Objective_picture_url  WHERE Objective_id = @Objective_id";
-            //     using (var command = new SqlCommand(query, connection))
-            //     {
-            //         command.Parameters.AddWithValue("@name", Objective1.Name);
-            //         command.Parameters.AddWithValue("@Objective_type", Objective1.Objective_Type.ToString());
-            //         command.Parameters.AddWithValue("@amount", Objective1.Amount);
-            //         command.Parameters.AddWithValue("@weekly_budget", Objective1.Weekly_budget);
-            //         command.Parameters.AddWithValue("@monthly_budget", Objective1.Monthly_budget);
-            //         command.Parameters.AddWithValue("@Objective_picture_url", (object)Objective1.Objective_picture_url ?? DBNull.Value);
+                string query = "UPDATE Objective SET name = @name, Objective_type = @Objective_type, amount = @amount, weekly_budget = @weekly_budget, monthly_budget = @monthly_budget, Objective_picture_url = @Objective_picture_url  WHERE Objective_id = @Objective_id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@name", objective.Name);
+                    command.Parameters.AddWithValue("@Objective_type", objective.Target_amount.ToString());
+                    command.Parameters.AddWithValue("@amount", objective.Current_save);
+                    command.Parameters.AddWithValue("@weekly_budget", objective.Deadline);
+                    command.Parameters.AddWithValue("@monthly_budget", objective.Objective_id);
+                    command.Parameters.AddWithValue("@Objective_picture_url", objective.Objective_picture_url);
+                    command.Parameters.AddWithValue("@Objective_id", objective.Objective_id);
 
-            //         command.Parameters.AddWithValue("@Objective_id", Objective1.Objective_id);
-
-            //         await command.ExecuteNonQueryAsync();
-            //     }
-            // }
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
         }
 
         public async Task DeleteAsync(int id)
         {
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync();
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
 
-            //     string query = "DELETE FROM ObjectiveS WHERE Objective_id = @Objective_id";
-            //     using (var command = new SqlCommand(query, connection))
-            //     {
-            //         command.Parameters.AddWithValue("@Objective_id", id);
+                string query = "DELETE FROM ObjectiveS WHERE Objective_id = @Objective_id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Objective_id", id);
 
-            //         await command.ExecuteNonQueryAsync();
-            //     }
-            // }
+                    await command.ExecuteNonQueryAsync();
+                }
+            }
         }
 
 

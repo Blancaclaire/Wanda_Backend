@@ -11,7 +11,6 @@ public class Account
     public double Weekly_budget { get; set; }
     public double Monthly_budget { get; set; }
     public string Account_picture_url { get; set; }
-
     public DateTime Creation_date { get; set; }
 
     public Account()
