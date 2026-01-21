@@ -18,9 +18,9 @@ GET /api/User/{userId}: Consulta un usuario
 
 PUT /api/User/{userId}: Modifica un usuario
 
-DELETE /api/User/{userId}:****Debe implementarse desde sql un método para que si se borra un usuario se borren tambien sus cuentas y sus registros en tabla intermedia.
+DELETE /api/User/{userId}: Antes de eliminar el user se borra su cuenta personal y esto dispara el metodo sql de borrado en cascada de accounts, despues se elimina el user de la tabla USERS
 
-
+*Debe considerarse que ocurre si un usuario es admin de una cuenta conjunta, que pasaria entonces?? Eliminar los roles lo soluciona?
 
 ACCOUNTS
 
@@ -28,7 +28,7 @@ GET /api/Account: Consulta todos los Usuarios
 
 POST /api/Account: Se usa específicamente para crear cuentas compartidas, puesto que las personales se crean automáticamente al crear el usuario. Implementa métodos de validación como que la menos la lista de usuarios sea mayor a una persona, y el nombre de la cuneta no sea nulo. Al igual que en Users, cuando se añade una cuenta se llama tambien al repositorio de la tabla intermedia. Estableciendo como admin al dueño de la cuenta y al resto con rol member.
 
-**Recomendable añadir método de comprobación de que los ids que se estan metiendo son de usuarios de wanda
+**Recomendable cambiar el metodo para que no sea necesario pasarle el ownerId al controlador: implementacion con jwt
 
 PUT /api/Account/{accountId}: Modifica una cuenta. En el caso de la cuenta conjunta no puede modificarse el campo amount puesto que esta no tendria un valor como tal que se gestione en la aplicación.
 

@@ -13,52 +13,75 @@ namespace wandaAPI.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountUsersRepository _accountUsersRepository;
 
-        public AccountService(IAccountRepository accountRepository, IAccountUsersRepository accountUsersRepository)
+        private readonly IUserRepository _userRepository;
+
+        public AccountService(IAccountRepository accountRepository, IAccountUsersRepository accountUsersRepository, IUserRepository userRepository)
         {
             _accountRepository = accountRepository;
             _accountUsersRepository = accountUsersRepository;
+            _userRepository = userRepository;
+        }
+
+        private async Task ValidateJointAccountDataAsync(JointAccountCreateDto dto, int ownerId)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre de la cuenta es obligatorio.");
+
+            
+            var allMemberIds = dto.Member_Ids ?? new List<int>();
+            var uniqueMembers = allMemberIds.Append(ownerId).Distinct().ToList();
+
+            if (uniqueMembers.Count < 2)
+                throw new ArgumentException("Una cuenta conjunta debe tener al menos dos miembros diferentes.");
+
+            
+            var owner = await _userRepository.GetByIdAsync(ownerId);
+            if (owner == null) throw new KeyNotFoundException($"El usuario creador (ID: {ownerId}) no existe.");
+
+            
+            foreach (var id in allMemberIds)
+            {
+                var user = await _userRepository.GetByIdAsync(id);
+                if (user == null)
+                    throw new KeyNotFoundException($"El usuario invitado con ID {id} no existe en el sistema.");
+            }
         }
 
         public async Task AddJointAccountAsync(JointAccountCreateDto dto, int ownerId)
         {
-            if (dto == null) throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("El nombre de la cuenta es obligatorio.");
-            if (dto.Member_Ids == null || dto.Member_Ids.Count == 0) throw new ArgumentException("Debes añadir al menos un miembro.");
+            await ValidateJointAccountDataAsync(dto, ownerId);
 
             var jointAccount = new Account
             {
                 Name = dto.Name,
                 Account_Type = Account.AccountType.joint,
-                Amount = 0
+                Amount = 0,
+                Creation_date = DateTime.Now
             };
 
             int accountId = await _accountRepository.AddAsync(jointAccount);
 
-            var accountAdmin = new AccountUsers
+            await _accountUsersRepository.AddAsync(new AccountUsers
             {
                 User_id = ownerId,
                 Account_id = accountId,
-                Role = AccountUsers.UserRole.admin
-            };
+                Role = AccountUsers.UserRole.admin,
+                Joined_at = DateTime.Now
+            });
 
-            //establece el dueño como admin y lo mete en ACCOUNTS_USERS
-            await _accountUsersRepository.AddAsync(accountAdmin);
+            var otherMembers = dto.Member_Ids.Where(id => id != ownerId).Distinct();
 
-
-            //mete al resto de users que no son el dueño como members en ACCOUNTS_USERS
-            foreach (var memberId in dto.Member_Ids)
+            foreach (var memberId in otherMembers)
             {
-                if (memberId != ownerId)
+                await _accountUsersRepository.AddAsync(new AccountUsers
                 {
-                    var accountMember = new AccountUsers
-                    {
-                        User_id = memberId,
-                        Account_id = accountId,
-                        Role = AccountUsers.UserRole.member
-                    };
-
-                    await _accountUsersRepository.AddAsync(accountMember);
-                }
+                    User_id = memberId,
+                    Account_id = accountId,
+                    Role = AccountUsers.UserRole.member,
+                    Joined_at = DateTime.Now
+                });
             }
         }
 

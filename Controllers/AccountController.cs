@@ -24,14 +24,15 @@ namespace wandaAPI.Controllers
         }
 
         [HttpGet("{accountId}")]
-        public async Task<ActionResult<Account>> GetAccountById(int id)
+        public async Task<ActionResult<Account>> GetAccountById(int accountId)
         {
-            var account = await _accountService.GetByIdAsync(id);
+            var account = await _accountService.GetByIdAsync(accountId);
             if (account == null) return NotFound("Cuenta no encontrada");
             return Ok(account);
         }
 
         [HttpPost]
+        
         public async Task<ActionResult> CreateAccount([FromBody] JointAccountCreateDto account, int ownerId)
         {
 
@@ -40,20 +41,20 @@ namespace wandaAPI.Controllers
         }
 
         [HttpPut("{accountId}")]
-        public async Task<IActionResult> UpdateAccount(int id, [FromBody]  AccountUpdateDto accountDto)
+        public async Task<IActionResult> UpdateAccount(int accountId, [FromBody]  AccountUpdateDto accountDto)
         {
             try
             {
 
-                if (id <= 0) return BadRequest("El ID no es válido");
+                if (accountId <= 0) return BadRequest("El ID no es válido");
 
-                var existingAccount = await _accountService.GetByIdAsync(id);
+                var existingAccount = await _accountService.GetByIdAsync(accountId);
                 if (existingAccount == null)
                 {
                     return NotFound();
                 }
 
-                await _accountService.UpdateAsync(id, accountDto);
+                await _accountService.UpdateAsync(accountId, accountDto);
                 return NoContent();
 
 
@@ -69,11 +70,11 @@ namespace wandaAPI.Controllers
         }
 
         [HttpDelete("{accountId}")]
-        public async Task<IActionResult> DeleteAccount(int id)
+        public async Task<IActionResult> DeleteAccount(int accountId)
         {
             try
             {
-                await _accountService.DeleteAsync(id);
+                await _accountService.DeleteAsync(accountId);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)

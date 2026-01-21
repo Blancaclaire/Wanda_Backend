@@ -49,9 +49,10 @@ CREATE TABLE ACCOUNT_USERS (
     user_id INT NOT NULL,
     account_id INT NOT NULL,
     role NVARCHAR(20) DEFAULT 'member' CHECK (role IN ('admin', 'member')),
-    joined_at DATETIME DEFAULT GETDATE(), -- <--- Nombre mucho más claro
+    joined_at DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (user_id, account_id),
-    CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    -- Agregamos ON DELETE CASCADE aquí:
+    CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
     CONSTRAINT FK_AccountUsers_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE
 );
 

@@ -30,11 +30,11 @@ namespace wandaAPI.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<ActionResult<User>> GetUserById(int id)
+        public async Task<ActionResult<User>> GetUserById(int userId)
         {
             try
             {
-                var User = await _userService.GetByIdAsync(id);
+                var User = await _userService.GetByIdAsync(userId);
                 return Ok(User);
             }
 
@@ -59,20 +59,20 @@ namespace wandaAPI.Controllers
         }
 
         [HttpPut("{userId}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDTO updatedUser)
+        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateDTO updatedUser)
         {
 
-            if (id <= 0) return BadRequest("El ID no es válido");
+            if (userId <= 0) return BadRequest("El ID no es válido");
 
             try
             {
-                var existingUser = await _userService.GetByIdAsync(id);
+                var existingUser = await _userService.GetByIdAsync(userId);
                 if (existingUser == null)
                 {
                     return NotFound();
                 }
 
-                await _userService.UpdateAsync(id, updatedUser);
+                await _userService.UpdateAsync(userId, updatedUser);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -86,12 +86,12 @@ namespace wandaAPI.Controllers
         }
 
         [HttpDelete("{userId}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(int userId)
         {
 
             try
             {
-                await _userService.DeleteAsync(id);
+                await _userService.DeleteAsync(userId);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
