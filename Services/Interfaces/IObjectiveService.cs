@@ -1,14 +1,14 @@
 using Models;
-
+using DTOs;
 namespace wandaAPI.Services
 {
     public interface IObjectiveService
-    {   
-        Task<List<Objective>> GetByAccountAsync(IObjectiveService ObjectiveDto ,int accountId);
-        Task<Objective> CreateObjectiveAsync(Objective objective);
-        Task<Objective?> AddFundsAsync(int objectiveId, double amount);//amount se crea al vuelo
-        Task<int> GetProgressAsync(int acountId);//devuelve un %
+    {
+        Task<List<Objective>> GetByAccountAsync(int accountId);
+        Task<Objective> CreateAsync(int accountId, ObjectiveCreateDto dto);
+        Task<Objective?> GetByIdAsync(int id);
+        Task UpdateAsync(int id, ObjectiveUpdateDto dto);
         Task DeleteAsync(int id);
-
+        Task AddFundsAsync(int id, double amount);
     }
 }

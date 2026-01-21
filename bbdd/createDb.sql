@@ -58,7 +58,7 @@ CREATE TABLE OBJECTIVES (
     account_id INT NOT NULL,
     name NVARCHAR(100) NOT NULL,
     target_amount DECIMAL(18, 2) NOT NULL,
-    current_ahorro DECIMAL(18, 2) DEFAULT 0.00,
+    current_save DECIMAL(18, 2) DEFAULT 0.00,
     deadline DATE NULL,
     objetive_picture_url NVARCHAR(MAX) NULL,
     CONSTRAINT FK_Objectives_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE
@@ -118,7 +118,7 @@ INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 2, 'admin');
 INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (1, 3, 'admin'); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 3, 'member');
 
-INSERT INTO OBJECTIVES (account_id, name, target_amount, current_ahorro, deadline)
+INSERT INTO OBJECTIVES (account_id, name, target_amount, current_save, deadline)
 VALUES (1, 'Viaje Japón', 3000.00, 0.00, '2026-12-01');
 
 INSERT INTO TRANSACTIONS (account_id, user_id, category, objective_id, amount, transaction_type, concept, split_type)

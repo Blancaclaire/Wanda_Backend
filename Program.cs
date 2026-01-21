@@ -13,7 +13,7 @@ builder.Services.AddScoped<IObjectiveRepository, ObjectiveRepository>();
 //Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IObjetiveService, ObjetiveService>();
+builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
 
 
 // Add services to the container.

@@ -3,26 +3,8 @@ namespace Models;
 public class ObjectiveUpdateDto
 {
     public string Name { get; set; }
-
-    public double Amount { get; set; }
-
-    public double Weekly_budget { get; set; }
-
-    public double Monthly_budget { get; set; }
-    public string Account_picture_url { get; set; }
-
-
-    public ObjectiveUpdateDto()
-    {
-
-    }
-
-    public ObjectiveUpdateDto(string name, double amount, double monthly_budget, double weekly_budget, string account_picture_url)
-    {
-        Name = name;
-        Amount = amount;
-        Weekly_budget = weekly_budget;
-        Monthly_budget = monthly_budget;
-        Account_picture_url = account_picture_url;
-    }
+    public double Target_amount { get; set; }
+    public double Current_save { get; set; }
+    public DateTime Deadline { get; set; }
+    public string Objective_picture_url { get; set; }
 }
