@@ -13,7 +13,7 @@ namespace wandaAPI.Controllers
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
 
-        public UserController(IUserService userService, IConfiguration configuration)
+        public UserController(IUserService userService, IConfiguration configuration) // este esta bien 
         {
             _userService = userService;
             _configuration = configuration;

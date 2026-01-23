@@ -8,11 +8,13 @@ var connectionString = builder.Configuration.GetConnectionString("wandaDb");
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountUsersRepository, AccountUsersRepository>();
+builder.Services.AddScoped<IObjectiveRepository, ObjectiveRepository>();
 
 //Services
-
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
+
 
 // Add services to the container.
 
@@ -29,7 +31,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

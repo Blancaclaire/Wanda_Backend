@@ -4,6 +4,7 @@
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -p 1433:1433 -d mcr.microsoft.com/mssql/server:2019-CU21-ubuntu-20.04
 
 
+<<<<<<< HEAD
 # EXPLICACION MODELOS POR TABLAS
 
 USERS
@@ -100,3 +101,7 @@ PUT /api/transactions/{transactionId}: Para modificar una transacción existente
 DELETE /api/transactions/{transactionId}: Para eliminar una transacción. Si se elimina una transaccion automaticamente se actualiza amount de ACCOUNTS y si es de tipo saving tambien current_ahorro. 
 Si el split_type es divided debe eliminarse tambien de la tabla TRANSACTION_SPLITS
 *Falta por pensar
+=======
+## Modificaciones Current_ahorro por current_save, simple coherencia del lenguaje 
+
+>>>>>>> feature/objectives
