@@ -123,7 +123,6 @@ namespace wandaAPI.Repositories
                     command.Parameters.AddWithValue("@weekly_budget", Account1.Weekly_budget);
                     command.Parameters.AddWithValue("@monthly_budget", Account1.Monthly_budget);
                     command.Parameters.AddWithValue("@account_picture_url", (object)Account1.Account_picture_url ?? DBNull.Value);
-
                     command.Parameters.AddWithValue("@account_id", Account1.Account_id);
 
                     await command.ExecuteNonQueryAsync();

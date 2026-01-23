@@ -129,14 +129,20 @@ namespace wandaAPI.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                string query = "DELETE FROM OBJECTIVES WHERE objective_id = @objective_id";
+                string query = "DELETE objective_id = @objective_id FROM TRANSACTIONS WHERE objective_id = @objective_id ";
 
-                using (var command = new SqlCommand(query, connection))
+                using (var command = new SqlCommand(query,connection))
+
                 {
                     command.Parameters.AddWithValue("@objective_id", id);
                     await command.ExecuteNonQueryAsync();
+                    command.CommandText = "DELETE objective_id = @objective_id FROM OBJECTIVES WHERE objective_id = @objective_id";
+                    command.ExecuteNonQuery();
                 }
+                await connection.OpenAsync();
+
             }
         }
+        
     }
 }
