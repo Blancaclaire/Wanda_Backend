@@ -7,7 +7,6 @@ public class AccountUsers
 
     public int User_id { get; set; }
     public int Account_id { get; set; }
-    public UserRole Role { get; set; }
     public DateTime Joined_at { get; set; }
 
     public AccountUsers()
@@ -15,11 +14,10 @@ public class AccountUsers
         
     }
 
-    public AccountUsers(int user_id, int account_id, UserRole role, DateTime joined_at )
+    public AccountUsers(int user_id, int account_id, DateTime joined_at )
     {
         User_id = user_id;
         Account_id = account_id;
-        Role = role;
         Joined_at = joined_at;
     }
 

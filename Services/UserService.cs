@@ -85,8 +85,7 @@ namespace wandaAPI.Services
             var accountUser = new AccountUsers
             {
                 User_id = userId,
-                Account_id = accountId,
-                Role = AccountUsers.UserRole.admin
+                Account_id = accountId
             };
 
             //Añade en la tabla ACCOUNT_USERS el nuevo usuario y su nueva cuenta
