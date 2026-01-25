@@ -129,20 +129,33 @@ namespace wandaAPI.Repositories
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
-                string query = "DELETE objective_id = @objective_id FROM TRANSACTIONS WHERE objective_id = @objective_id ";
-
-                using (var command = new SqlCommand(query,connection))
-
+                using (var transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@objective_id", id);
-                    await command.ExecuteNonQueryAsync();
-                    command.CommandText = "DELETE objective_id = @objective_id FROM OBJECTIVES WHERE objective_id = @objective_id";
-                    command.ExecuteNonQuery();
-                }
-                await connection.OpenAsync();
+                    try
+                    {
+                        string deleteTransactions = "DELETE FROM TRANSACTIONS WHERE objective_id = @objective_id";
+                        using (var cmd1 = new SqlCommand(deleteTransactions, connection, transaction))
+                        {
+                            cmd1.Parameters.AddWithValue("@objective_id", id);
+                            await cmd1.ExecuteNonQueryAsync();
+                        }
 
+                        string deleteObjective = "DELETE FROM OBJECTIVES WHERE objective_id = @objective_id"; 
+                        using (var cmd2 = new SqlCommand(deleteObjective, connection, transaction))
+                        {
+                            cmd2.Parameters.AddWithValue("@objective_id", id);
+                            await cmd2.ExecuteNonQueryAsync();
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+                    catch
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
+                }
             }
         }
-        
     }
 }
