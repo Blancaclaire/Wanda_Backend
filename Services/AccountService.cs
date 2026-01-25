@@ -22,36 +22,31 @@ namespace wandaAPI.Services
             _userRepository = userRepository;
         }
 
-        private async Task ValidateJointAccountDataAsync(JointAccountCreateDto dto, int ownerId)
+        private async Task ValidateJointAccountDataAsync(JointAccountCreateDto dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
             if (string.IsNullOrWhiteSpace(dto.Name))
                 throw new ArgumentException("El nombre de la cuenta es obligatorio.");
 
-            
+
             var allMemberIds = dto.Member_Ids ?? new List<int>();
-            var uniqueMembers = allMemberIds.Append(ownerId).Distinct().ToList();
+            var uniqueMembers = allMemberIds.Distinct().ToList();
 
             if (uniqueMembers.Count < 2)
                 throw new ArgumentException("Una cuenta conjunta debe tener al menos dos miembros diferentes.");
 
-            
-            var owner = await _userRepository.GetByIdAsync(ownerId);
-            if (owner == null) throw new KeyNotFoundException($"El usuario creador (ID: {ownerId}) no existe.");
-
-            
-            foreach (var id in allMemberIds)
+            foreach (var id in uniqueMembers)
             {
                 var user = await _userRepository.GetByIdAsync(id);
                 if (user == null)
-                    throw new KeyNotFoundException($"El usuario invitado con ID {id} no existe en el sistema.");
+                    throw new KeyNotFoundException($"El usuario con ID {id} no existe en el sistema.");
             }
         }
 
-        public async Task AddJointAccountAsync(JointAccountCreateDto dto, int ownerId)
+        public async Task AddJointAccountAsync(JointAccountCreateDto dto)
         {
-            await ValidateJointAccountDataAsync(dto, ownerId);
+            await ValidateJointAccountDataAsync(dto);
 
             var jointAccount = new Account
             {
@@ -63,24 +58,13 @@ namespace wandaAPI.Services
 
             int accountId = await _accountRepository.AddAsync(jointAccount);
 
-            await _accountUsersRepository.AddAsync(new AccountUsers
-            {
-                User_id = ownerId,
-                Account_id = accountId,
-                Role = AccountUsers.UserRole.admin,
-                Joined_at = DateTime.Now
-            });
-
-            var otherMembers = dto.Member_Ids.Where(id => id != ownerId).Distinct();
-
-            foreach (var memberId in otherMembers)
+            foreach (var userId in dto.Member_Ids.Distinct())
             {
                 await _accountUsersRepository.AddAsync(new AccountUsers
                 {
-                    User_id = memberId,
-                    Account_id = accountId,
-                    Role = AccountUsers.UserRole.member,
-                    Joined_at = DateTime.Now
+                    User_id = userId,
+                    Account_id = accountId
+            
                 });
             }
         }

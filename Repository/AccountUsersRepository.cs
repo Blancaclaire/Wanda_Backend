@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 namespace wandaAPI.Repositories
 {
     public class AccountUsersRepository : IAccountUsersRepository
-    
+
     {
 
         private readonly string _connectionString;
@@ -20,15 +20,13 @@ namespace wandaAPI.Repositories
             {
                 await connection.OpenAsync();
 
-                string query = "INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (@user_id, @account_id, @role);";
+                string query = "INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (@user_id, @account_id);";
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@user_id", accountUsers.User_id);
                     command.Parameters.AddWithValue("@account_id", accountUsers.Account_id);
-                    command.Parameters.AddWithValue("@role", accountUsers.Role.ToString());
-
                     await command.ExecuteNonQueryAsync();
-                    
+
                 }
             }
         }

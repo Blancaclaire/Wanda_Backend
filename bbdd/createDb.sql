@@ -44,14 +44,11 @@ CREATE TABLE ACCOUNTS (
     creation_date DATETIME DEFAULT GETDATE() 
 );
 
--- TABLA INTERMEDIA (USUARIOS <-> CUENTAS)
 CREATE TABLE ACCOUNT_USERS (
     user_id INT NOT NULL,
     account_id INT NOT NULL,
-    role NVARCHAR(20) DEFAULT 'member' CHECK (role IN ('admin', 'member')),
     joined_at DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (user_id, account_id),
-    -- Agregamos ON DELETE CASCADE aquí:
     CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
     CONSTRAINT FK_AccountUsers_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE
 );
@@ -106,9 +103,11 @@ GO
 -- 3. CARGA DE DATOS INICIALES (SEEDING)
 -- =============================================
 
+-- Usuarios (se mantiene igual)
 INSERT INTO USERS (name, email, password) VALUES ('Ana García', 'ana@wanda.com', 'hash_password_1');
 INSERT INTO USERS (name, email, password) VALUES ('Juan Pérez', 'juan@wanda.com', 'hash_password_2');
 
+-- Cuentas (se mantiene igual, creation_date usa el valor por defecto)
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
 VALUES ('Ahorros Ana', 'personal', 1500.00, 100.00, 400.00); 
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
@@ -117,14 +116,18 @@ VALUES ('Cuenta Juan', 'personal', 1200.00, 80.00, 350.00);
 INSERT INTO ACCOUNTS (name, account_type, amount) 
 VALUES ('Casa Ana y Juan', 'joint', 500.00); 
 
-INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (1, 1, 'admin'); 
-INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 2, 'admin'); 
-INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (1, 3, 'admin'); 
-INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 3, 'member');
+-- Relación Usuarios <-> Cuentas (Se ha eliminado la columna 'role')
+-- SQL Server asignará automáticamente la fecha en 'joined_at'
+INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 1); 
+INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (2, 2); 
+INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 3); 
+INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (2, 3);
 
+-- Objetivos de Ahorro (se mantiene igual)
 INSERT INTO OBJECTIVES (account_id, name, target_amount, current_save, deadline)
 VALUES (1, 'Viaje Japón', 3000.00, 0.00, '2026-12-01');
 
+-- Transacciones (se mantiene igual, transaction_date usa el valor por defecto)
 INSERT INTO TRANSACTIONS (account_id, user_id, category, objective_id, amount, transaction_type, concept, split_type)
 VALUES (1, 1, 'Ocio', 1, 100.00, 'saving', 'Aportación Japón', 'individual');
 
@@ -134,6 +137,7 @@ VALUES (3, 2, 'Hogar', 50.00, 'expense', 'Fibra Óptica', 'contribution');
 INSERT INTO TRANSACTIONS (account_id, user_id, category, amount, transaction_type, concept, split_type)
 VALUES (3, 1, 'Comida', 60.00, 'expense', 'Cena Viernes', 'divided'); 
 
+-- Reparto de Gastos (se mantiene igual)
 INSERT INTO TRANSACTION_SPLITS (user_id, transaction_id, amount_assigned, status)
 VALUES (1, 3, 30.00, 'settled');
 INSERT INTO TRANSACTION_SPLITS (user_id, transaction_id, amount_assigned, status)

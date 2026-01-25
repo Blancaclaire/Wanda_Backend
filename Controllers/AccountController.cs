@@ -33,10 +33,10 @@ namespace wandaAPI.Controllers
 
         [HttpPost]
         
-        public async Task<ActionResult> CreateAccount([FromBody] JointAccountCreateDto account, int ownerId)
+        public async Task<ActionResult> CreateAccount([FromBody] JointAccountCreateDto account)
         {
 
-            await _accountService.AddJointAccountAsync(account, ownerId);
+            await _accountService.AddJointAccountAsync(account);
             return Ok("Joint Account creada exitosamente");
         }
 
