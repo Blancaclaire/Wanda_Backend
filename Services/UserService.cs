@@ -137,12 +137,28 @@ namespace wandaAPI.Services
 
         public async Task DeleteAsync(int id)
         {
-            var user1 = await _userRepository.GetByIdAsync(id);
-            if (user1 == null)
+            // 1. Verificar si el usuario existe
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
             {
                 throw new KeyNotFoundException("El User no existe");
             }
 
+            // 2. Buscar y borrar la cuenta PERSONAL del usuario
+            // Necesitarás un método en el repositorio para encontrar la cuenta personal asociada al user_id
+            var accounts = await _accountService.GetAllAsync(); // O un método especializado
+            var personalAccount = accounts.FirstOrDefault(a =>
+                a.Account_Type == Account.AccountType.personal &&
+                a.Name == user.Name); // O mediante una consulta a ACCOUNT_USERS para mayor precisión
+
+            if (personalAccount != null)
+            {
+                // Al borrar la cuenta, el ON DELETE CASCADE del SQL limpiará ACCOUNT_USERS para esta cuenta
+                await _accountService.DeleteAsync(personalAccount.Account_id);
+            }
+
+            // 3. Borrar el usuario
+            // El ON DELETE CASCADE que configuramos en SQL limpiará su participación en cuentas compartidas
             await _userRepository.DeleteAsync(id);
 
         }

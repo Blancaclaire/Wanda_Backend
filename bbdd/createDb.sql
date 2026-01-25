@@ -1,3 +1,6 @@
+
+
+
 -- =============================================
 -- 1. LIMPIEZA Y CREACIÓN DE LA BASE DE DATOS
 -- =============================================
@@ -37,7 +40,7 @@ CREATE TABLE ACCOUNTS (
     amount DECIMAL(18, 2) DEFAULT 0.00,
     weekly_budget DECIMAL(18, 2) NULL,
     monthly_budget DECIMAL(18, 2) NULL,
-    account_picture_url NVARCHAR(MAX) NULL,
+    account_picture_url NVARCHAR(100) NULL,
     creation_date DATETIME DEFAULT GETDATE() 
 );
 
@@ -46,9 +49,10 @@ CREATE TABLE ACCOUNT_USERS (
     user_id INT NOT NULL,
     account_id INT NOT NULL,
     role NVARCHAR(20) DEFAULT 'member' CHECK (role IN ('admin', 'member')),
-    joined_at DATETIME DEFAULT GETDATE(), -- <--- Nombre mucho más claro
+    joined_at DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (user_id, account_id),
-    CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
+    -- Agregamos ON DELETE CASCADE aquí:
+    CONSTRAINT FK_AccountUsers_User FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
     CONSTRAINT FK_AccountUsers_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE
 );
 
@@ -60,7 +64,7 @@ CREATE TABLE OBJECTIVES (
     target_amount DECIMAL(18, 2) NOT NULL,
     current_save DECIMAL(18, 2) DEFAULT 0.00,
     deadline DATE NULL,
-    objetive_picture_url NVARCHAR(MAX) NULL,
+    objective_picture_url NVARCHAR(MAX) NULL,
     CONSTRAINT FK_Objectives_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE
 );
 
@@ -118,8 +122,8 @@ INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 2, 'admin');
 INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (1, 3, 'admin'); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id, role) VALUES (2, 3, 'member');
 
-INSERT INTO OBJECTIVES (account_id, name, target_amount, current_save, deadline,objetive_picture_url)
-VALUES (1, 'Viaje Japón', 3000.00, 0.00, '2026-12-01','patata mata a la patata');
+INSERT INTO OBJECTIVES (account_id, name, target_amount, current_save, deadline)
+VALUES (1, 'Viaje Japón', 3000.00, 0.00, '2026-12-01');
 
 INSERT INTO TRANSACTIONS (account_id, user_id, category, objective_id, amount, transaction_type, concept, split_type)
 VALUES (1, 1, 'Ocio', 1, 100.00, 'saving', 'Aportación Japón', 'individual');

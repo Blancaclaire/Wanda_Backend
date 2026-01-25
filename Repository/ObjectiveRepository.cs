@@ -34,8 +34,8 @@ namespace wandaAPI.Repositories
                                 Objective_id = reader.GetInt32(0),
                                 Account_id = reader.GetInt32(1),
                                 Name = reader.GetString(2),
-                                Target_amount = reader.GetDouble(3),
-                                Current_save = reader.GetDouble(4),
+                                Target_amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
+                                Current_save = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Deadline = reader.GetDateTime(5),
                                 Objective_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
                             });
@@ -66,8 +66,8 @@ namespace wandaAPI.Repositories
                                 Objective_id = reader.GetInt32(0),
                                 Account_id = reader.GetInt32(1),
                                 Name = reader.GetString(2),
-                                Target_amount = reader.GetDouble(3),
-                                Current_save = reader.GetDouble(4),
+                                Target_amount = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(3)),
+                                Current_save = reader.IsDBNull(3) ? 0 : Convert.ToDouble(reader.GetDecimal(4)),
                                 Deadline = reader.GetDateTime(5),
                                 Objective_picture_url = reader.IsDBNull(6) ? null : reader.GetString(6)
                             };
