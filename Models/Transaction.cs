@@ -1,36 +1,44 @@
 namespace Models;
 
 public class Transaction
-{   
-    public enum Transaction_type{ income, expense, saving }
-    public enum Splits_type{ individual, contribution, divided }
+{
+    public enum ETransaction_type { income, expense, saving }
+    public enum Split_type { individual, contribution, divided }
     public enum EFrecuency{mouthly, weekly, annual}
+
     public int Transaction_id { get; set; }
+    public int Account_id { get; set; }
     public int User_id { get; set; }
     public int Objective_id { get; set; }
-    public Transaction_type Transactions_Type { get; set; }
-    public Splits_type Splitstype { get; set; }
-    public EFrecuency Frecuency { get; set; }
     public string Category { get; set; }
     public double Amount { get; set; }
-    public string Concept{ get; set; }
-    public bool  IsRecurring { get; set; }
-    public DateTime Transactions_date { get; set; }
+    public ETransaction_type Transaction_type { get; set; }
+    public string Concept { get; set; }
+    public DateTime Transaction_date { get; set; }
+    public bool IsRecurring { get; set; }
+    public EFrecuency Frecuency { get; set; }
     public DateTime End_date { get; set; }
+    public Split_type Splittype { get; set; }
 
-public Transaction(Transaction_type transaction_Type, Splits_type splits_type, EFrecuency frecuency, int transactions_id, int user_id, int objective_id, double amount, string concept, bool isRecurring, string category, DateTime transactions_date, DateTime end_date)
-{       
-        Transactions_Type = transaction_Type;
-        Splitstype = splits_type;
-        Frecuency = frecuency;
-        Category = category;
-        Transaction_id = transactions_id;
+    public Transaction()
+    {
+
+    }
+
+    public Transaction(int transaction_id, int account_id, int user_id, int objective_id, string category, double amount, ETransaction_type transaction_type, string concept, bool isRecurring, EFrecuency frecuency, Split_type split_type, DateTime transaction_date, DateTime end_date)
+    {
+        Transaction_id = transaction_id;
+        Account_id = account_id;
         User_id = user_id;
         Objective_id = objective_id;
+        Category = category;
         Amount = amount;
+        Transaction_type = transaction_type;
         Concept = concept;
+        Transaction_date = transaction_date;
         IsRecurring = isRecurring;
-        Transactions_date = transactions_date;
+        Frecuency = frecuency;
         End_date = end_date;
-}
+        Splittype = split_type;
+    }
 }
