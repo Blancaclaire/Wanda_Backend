@@ -166,10 +166,7 @@ namespace wandaAPI.Repositories
                     return Convert.ToInt32(result);
                 }
             }
-
-
         }
-
 
 
 
