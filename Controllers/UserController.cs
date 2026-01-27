@@ -91,6 +91,10 @@ namespace wandaAPI.Controllers
 
             try
             {
+                if(userId <= 0)
+                {
+                    return BadRequest("El ID no es válido");
+                }
                 await _userService.DeleteAsync(userId);
                 return NoContent();
             }
