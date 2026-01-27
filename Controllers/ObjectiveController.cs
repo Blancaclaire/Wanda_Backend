@@ -4,7 +4,8 @@ using Models;
 using wandaAPI.Repositories;
 using wandaAPI.Services;
 
-namespace wandaAPI.Controllers{
+namespace wandaAPI.Controllers
+{
 
     [Route("api/[controller]")]
     [ApiController]
@@ -20,20 +21,80 @@ namespace wandaAPI.Controllers{
         [HttpGet("accounts/{accountId}/objectives")]
         public async Task<IActionResult> GetByAccount(int accountId)
         {
-            return Ok(await _service.GetByAccountAsync(accountId));
+            try
+            {
+                var Objective = await _service.GetByAccountAsync(accountId);
+                return Ok(Objective);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+
         }
 
         [HttpPost("accounts/{accountId}/objectives")]
         public async Task<IActionResult> Create(int accountId, [FromBody] ObjectiveCreateDto dto)
         {
-            return Ok(await _service.CreateAsync(accountId, dto));
+            try
+            {
+
+                return Ok(await _service.CreateAsync(accountId, dto));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
+
+
+        [HttpPut("{objectiveId}")]
+        public async Task<IActionResult> UpdateUser(int objectiveId, [FromBody] ObjectiveUpdateDto updatedObjective)
+        {
+
+            if (objectiveId <= 0) return BadRequest("El ID no es válido");
+
+            try
+            {
+                var existingUser = await _service.GetByIdAsync(objectiveId);
+                if (existingUser == null)
+                {
+                    return NotFound();
+                }
+
+                await _service.UpdateAsync(objectiveId, updatedObjective);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
 
         [HttpDelete("objectives/{objectiveId}")]
         public async Task<IActionResult> Delete(int objectiveId)
         {
-            await _service.DeleteAsync(objectiveId);
-            return NoContent();
+            try
+            {
+                if (objectiveId <= 0)
+                {
+                    return BadRequest("El ID no es válido");
+                }
+                await _service.DeleteAsync(objectiveId);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+
         }
     }
 }

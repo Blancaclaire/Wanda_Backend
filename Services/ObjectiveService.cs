@@ -16,6 +16,30 @@ namespace wandaAPI.Services
             _objectiveRepository = objectiveRepository;
         }
 
+
+        private void ValidateObjectiveData(string name, double targetAmount, double currentSave, DateTime deadline)
+        {
+
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("El nombre del objetivo es obligatorio.");
+
+
+            if (targetAmount <= 0)
+                throw new ArgumentException("La meta de ahorro debe ser un monto mayor a 0.");
+
+
+            if (currentSave < 0)
+                throw new ArgumentException("El ahorro actual no puede ser un valor negativo.");
+
+
+            if (targetAmount < currentSave)
+                throw new ArgumentException("La meta de ahorro no puede ser inferior al monto ya ahorrado.");
+
+
+            if (deadline <= DateTime.Now)
+                throw new ArgumentException("La fecha límite debe ser una fecha futura.");
+        }
+
         public async Task<List<Objective>> GetByAccountAsync(int accountId)
         {
             if (accountId <= 0) throw new ArgumentException("El ID de cuenta no es válido.");
@@ -27,8 +51,8 @@ namespace wandaAPI.Services
         public async Task<Objective> CreateAsync(int accountId, ObjectiveCreateDto dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
-            if (string.IsNullOrWhiteSpace(dto.Name)) throw new ArgumentException("El nombre es obligatorio.");
-            if (dto.Target_amount <= 0) throw new ArgumentException("La meta debe ser mayor a 0.");
+
+            ValidateObjectiveData(dto.Name, dto.Target_amount, 0, dto.Deadline);
 
             var objective = new Objective
             {
@@ -66,8 +90,13 @@ namespace wandaAPI.Services
 
         public async Task UpdateAsync(int id, ObjectiveUpdateDto dto)
         {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+
             var existing = await _objectiveRepository.GetByIdAsync(id);
             if (existing == null) throw new KeyNotFoundException("El objetivo no existe.");
+
+            
+            ValidateObjectiveData(dto.Name, dto.Target_amount, dto.Current_save, dto.Deadline);
 
             existing.Name = dto.Name;
             existing.Target_amount = dto.Target_amount;
