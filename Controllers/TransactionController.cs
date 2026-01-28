@@ -40,7 +40,7 @@ namespace wandaAPI.Controllers
             try
             {
                 var createdTransaction = await _transactionService.CreateAsync(accountId, dto);
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = createdTransaction.Transaction_id }, createdTransaction);
+                return Ok("Transaction creada");
             }
             catch (ArgumentException ex)
             {

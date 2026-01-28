@@ -79,7 +79,7 @@ namespace wandaAPI.Services
             //Añade el nuevo User a la tabla de USERS
             int userId = await _userRepository.AddAsync(user);
 
-            //Añade la nueva Account a partir de User a la tabla de ACCOUNTS
+
             int accountId = await _accountService.AddPersonalAccountAsync(user.Name);
 
             var accountUser = new AccountUsers
@@ -88,7 +88,7 @@ namespace wandaAPI.Services
                 Account_id = accountId
             };
 
-            //Añade en la tabla ACCOUNT_USERS el nuevo usuario y su nueva cuenta
+
             await _accountUsersRepository.AddAsync(accountUser);
 
         }
@@ -144,11 +144,13 @@ namespace wandaAPI.Services
             }
 
             // 2. Buscar y borrar la cuenta PERSONAL del usuario
-            // Necesitarás un método en el repositorio para encontrar la cuenta personal asociada al user_id
-            var accounts = await _accountService.GetAllAsync(); // O un método especializado
+            // Obtenemos todas las cuentas (o mejor, usa un método que filtre por usuario si lo tienes)
+            var accounts = await _accountService.GetAllAsync();
+
+            // CAMBIO: Ahora comparamos contra la cadena "personal"
             var personalAccount = accounts.FirstOrDefault(a =>
-                a.Account_Type == Account.AccountType.personal &&
-                a.Name == user.Name); // O mediante una consulta a ACCOUNT_USERS para mayor precisión
+                a.Account_type == "personal" &&
+                a.Name == user.Name);
 
             if (personalAccount != null)
             {
@@ -157,9 +159,8 @@ namespace wandaAPI.Services
             }
 
             // 3. Borrar el usuario
-            // El ON DELETE CASCADE que configuramos en SQL limpiará su participación en cuentas compartidas
+            // El ON DELETE CASCADE configurado en la base de datos limpiará su participación en otras tablas
             await _userRepository.DeleteAsync(id);
-
         }
 
     }
