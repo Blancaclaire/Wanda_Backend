@@ -9,12 +9,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountUsersRepository, AccountUsersRepository>();
 builder.Services.AddScoped<IObjectiveRepository, ObjectiveRepository>();
-
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 //Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
-
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 // Add services to the container.
 
@@ -27,6 +27,10 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod()    // Permite GET, POST, PUT, DELETE, etc.
                   .AllowAnyHeader();   // Permite cualquier cabecera
         });
+});
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.FullName);
 });
 
 builder.Services.AddControllers();

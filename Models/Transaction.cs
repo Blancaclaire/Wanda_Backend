@@ -4,8 +4,7 @@ public class Transaction
 {
     public enum ETransaction_type { income, expense, saving }
     public enum Split_type { individual, contribution, divided }
-    public enum EFrecuency{mouthly, weekly, annual}
-
+    public enum EFrequency{mouthly, weekly, annual}
     public int Transaction_id { get; set; }
     public int Account_id { get; set; }
     public int User_id { get; set; }
@@ -16,7 +15,7 @@ public class Transaction
     public string Concept { get; set; }
     public DateTime Transaction_date { get; set; }
     public bool IsRecurring { get; set; }
-    public EFrecuency Frecuency { get; set; }
+    public EFrequency Frequency { get; set; }
     public DateTime End_date { get; set; }
     public Split_type Splittype { get; set; }
 
@@ -25,7 +24,7 @@ public class Transaction
 
     }
 
-    public Transaction(int transaction_id, int account_id, int user_id, int objective_id, string category, double amount, ETransaction_type transaction_type, string concept, bool isRecurring, EFrecuency frecuency, Split_type split_type, DateTime transaction_date, DateTime end_date)
+    public Transaction(int transaction_id, int account_id, int user_id, int objective_id, string category, double amount, ETransaction_type transaction_type, string concept, bool isRecurring, EFrequency frequency, Split_type split_type, DateTime transaction_date, DateTime end_date)
     {
         Transaction_id = transaction_id;
         Account_id = account_id;
@@ -37,7 +36,7 @@ public class Transaction
         Concept = concept;
         Transaction_date = transaction_date;
         IsRecurring = isRecurring;
-        Frecuency = frecuency;
+        Frequency = frequency;
         End_date = end_date;
         Splittype = split_type;
     }

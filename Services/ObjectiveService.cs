@@ -92,19 +92,19 @@ namespace wandaAPI.Services
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
-            var existing = await _objectiveRepository.GetByIdAsync(id);
-            if (existing == null) throw new KeyNotFoundException("El objetivo no existe.");
+            var account = await _objectiveRepository.GetByIdAsync(id);
+            if (account == null) throw new KeyNotFoundException("El objetivo no existe.");
 
             
             ValidateObjectiveData(dto.Name, dto.Target_amount, dto.Current_save, dto.Deadline);
 
-            existing.Name = dto.Name;
-            existing.Target_amount = dto.Target_amount;
-            existing.Current_save = dto.Current_save;
-            existing.Deadline = dto.Deadline;
-            existing.Objective_picture_url = dto.Objective_picture_url;
+            account.Name = dto.Name;
+            account.Target_amount = dto.Target_amount;
+            account.Current_save = dto.Current_save;
+            account.Deadline = dto.Deadline;
+            account.Objective_picture_url = dto.Objective_picture_url;
 
-            await _objectiveRepository.UpdateAsync(existing);
+            await _objectiveRepository.UpdateAsync(account);
         }
 
         public async Task DeleteAsync(int id)
