@@ -9,5 +9,7 @@ namespace wandaAPI.Repositories
         Task<int> AddTransactionAsync(Transaction transaction);
         Task UpdateTransactionAsync(Transaction transaction);
         Task DeleteTransactionAsync(int transaction_id);
+
+        Task UpdateLastExecutionAsync(int transactionId, DateTime date); //metodo para el cron
     }
 }

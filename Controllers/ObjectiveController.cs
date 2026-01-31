@@ -7,7 +7,7 @@ using wandaAPI.Services;
 namespace wandaAPI.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class ObjectivesController : ControllerBase
     {

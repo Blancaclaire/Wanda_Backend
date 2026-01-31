@@ -14,6 +14,7 @@ public class Transaction
     public string? Frequency { get; set; }        
     public DateTime? End_date { get; set; }
     public string Split_type { get; set; }      
+    public DateTime? Last_execution_date { get; set; }
 
 
     public Transaction()
@@ -21,7 +22,7 @@ public class Transaction
 
     }
 
-    public Transaction(int transaction_id, int account_id, int user_id, int objective_id, string category, double amount, string transaction_type, string concept, bool isRecurring, string frequency, string split_type, DateTime transaction_date, DateTime end_date)
+    public Transaction(int transaction_id, int account_id, int user_id, int objective_id, string category, double amount, string transaction_type, string concept, bool isRecurring, string frequency, string split_type, DateTime transaction_date, DateTime end_date, DateTime last_execution_date )
     {
         Transaction_id = transaction_id;
         Account_id = account_id;
@@ -36,5 +37,6 @@ public class Transaction
         Frequency = frequency;
         End_date = end_date;
         Split_type = split_type;
+        Last_execution_date= last_execution_date;
     }
 }

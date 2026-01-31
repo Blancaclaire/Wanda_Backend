@@ -14,4 +14,6 @@ public class TransactionUpdateDTO
     public string? Frequency { get; set; }        
     public DateTime End_date { get; set; }
 
+    public DateTime? Last_execution_date { get; set; }
+
 }
