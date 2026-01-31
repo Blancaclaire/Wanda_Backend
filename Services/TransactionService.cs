@@ -28,9 +28,9 @@ namespace wandaAPI.Services
         // Metodo para crear una transaccion. Tipos de transacciones:
         // Personal - ingreso
         // Personal - gasto
-        // Conjunta - contribucion
+        // Conjunta - gasto contribucion
         // Conjunta - gasto dividido
-        // Aportaciion Objetivo 
+        // Aportaciion Objetivo - gasto saving
 
         
         public async Task<Models.Transaction> CreateAsync(int accountId, TransactionCreateDTO dto)
