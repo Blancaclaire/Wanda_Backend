@@ -12,8 +12,7 @@ public class TransactionUpdateDTO
     public DateTime Transaction_date { get; set; }
     public bool IsRecurring { get; set; }
     public string? Frequency { get; set; }        
-    public DateTime End_date { get; set; }
-
+    public DateTime? End_date { get; set; }
     public DateTime? Last_execution_date { get; set; }
 
 }

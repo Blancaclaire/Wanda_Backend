@@ -110,7 +110,7 @@ namespace wandaAPI.Repositories
                                 concept = @concept, 
                                 isRecurring = @isRecurring, 
                                 transaction_date = @date, 
-                                end_date = @end_date ,
+                                end_date = @end_date 
                                 WHERE transaction_id = @transaction_id";
 
                 using (var command = new SqlCommand(query, connection))

@@ -14,6 +14,9 @@ public class TransactionCreateDTO
     public string? Frequency { get; set; }        
     public DateTime? End_date { get; set; }
     public string Split_type { get; set; } 
-    public DateTime? Last_execution_date { get; set; }      
+    public DateTime? Last_execution_date { get; set; } 
+
+    public List<TransactionSplitDetailDTO>? CustomSplits { get; set; }     
+    
 }
  
