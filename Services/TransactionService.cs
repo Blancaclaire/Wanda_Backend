@@ -287,14 +287,14 @@ namespace wandaAPI.Services
         //2. DELETE
         public async Task DeleteAsync(int id)
         {
-          
+
             var tx = await _transactionRepository.GetTransactionAsync(id);
             if (tx == null) throw new KeyNotFoundException("La transacción no existe.");
 
             // Verifica las deudas pagadas
             if (tx.Split_type.ToLower() == "divided")
             {
-             
+
                 var splits = await _splitRepository.GetByTransactionIdAsync(id);
 
                 // Si alguno está pagado, prohibimos borrar
@@ -310,13 +310,13 @@ namespace wandaAPI.Services
 
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                
+
                 await RevertBalanceEffectAsync(fundingAccount, tx);
 
-                
+
                 await RevertObjectiveEffectAsync(tx);
 
-                
+
                 await _transactionRepository.DeleteTransactionAsync(id);
 
                 //Borra la transaccion Espejo
@@ -326,7 +326,7 @@ namespace wandaAPI.Services
                         ? $"(Gasto Compartido) {tx.Concept}"
                         : $"(Aportación Conjunta) {tx.Concept}";
 
-                    
+
                     var personalTxs = await _transactionRepository.GetTransactionsByAccountAsync(fundingAccount.Account_id);
 
                     var mirrorTx = personalTxs.FirstOrDefault(t =>
@@ -381,49 +381,80 @@ namespace wandaAPI.Services
 
         //UPDATE--------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+        // UPDATE
         public async Task UpdateAsync(int id, TransactionUpdateDTO dto)
         {
             if (dto == null) throw new ArgumentNullException(nameof(dto));
 
-
             var originalTx = await _transactionRepository.GetTransactionAsync(id);
             if (originalTx == null) throw new KeyNotFoundException("La transacción no existe.");
 
+            // Mantenemos tu protección para no editar gastos divididos
             if (originalTx.Split_type.ToLower() == "divided")
             {
                 throw new InvalidOperationException("No es posible editar un gasto compartido. Por favor, elimínalo y créalo de nuevo con los datos correctos.");
             }
 
-
             ValidateUpdateData(dto, originalTx);
-
 
             var targetAccount = await _accountRepository.GetByIdAsync(originalTx.Account_id);
             var fundingAccount = await ResolveFundingAccountAsync(targetAccount, originalTx.User_id);
 
-
+            // Cálculos de saldo
             double amountDifference = dto.Amount - originalTx.Amount;
             bool hasAmountChanged = amountDifference != 0;
-
 
             if (hasAmountChanged && amountDifference > 0 &&
                (originalTx.Transaction_type == "expense" || originalTx.Transaction_type == "saving"))
             {
-
                 ValidateSufficientFunds(fundingAccount, amountDifference, originalTx.Transaction_type);
             }
 
-
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-
+                // 1. Ajustar Saldos y Objetivos
                 if (hasAmountChanged)
                 {
                     await AdjustBalanceForUpdateAsync(fundingAccount, originalTx.Transaction_type, amountDifference);
-
                     await AdjustObjectiveForUpdateAsync(originalTx, amountDifference);
                 }
 
+                //Actualiza transaccion espejo en cuenta personal
+                if (targetAccount.Account_id != fundingAccount.Account_id)
+                {
+                    
+                    string oldEspejoConcepto = originalTx.Split_type.ToLower() == "divided"
+                        ? $"(Gasto Compartido) {originalTx.Concept}"
+                        : $"(Aportación Conjunta) {originalTx.Concept}";
+
+                    // Buscamos transaccioin que coincida con los datos antiguos
+                    var personalTxs = await _transactionRepository.GetTransactionsByAccountAsync(fundingAccount.Account_id);
+
+                    var mirrorTx = personalTxs.FirstOrDefault(t =>
+                        t.Amount == originalTx.Amount &&                
+                        t.Transaction_date == originalTx.Transaction_date && 
+                        t.Concept == oldEspejoConcepto                  
+                    );
+
+                    
+                    if (mirrorTx != null)
+                    {
+                        string newEspejoConcepto = originalTx.Split_type.ToLower() == "divided"
+                            ? $"(Gasto Compartido) {dto.Concept}"
+                            : $"(Aportación Conjunta) {dto.Concept}";
+
+                        mirrorTx.Amount = dto.Amount;
+                        mirrorTx.Category = dto.Category;
+                        mirrorTx.Concept = newEspejoConcepto; 
+                        mirrorTx.Transaction_date = dto.Transaction_date;
+                        mirrorTx.IsRecurring = dto.IsRecurring;
+                        mirrorTx.Frequency = dto.IsRecurring ? dto.Frequency?.ToLower() : null;
+                        mirrorTx.End_date = dto.End_date;
+
+                        await _transactionRepository.UpdateTransactionAsync(mirrorTx);
+                    }
+                }
+                
 
                 originalTx.Amount = dto.Amount;
                 originalTx.Category = dto.Category;
@@ -434,13 +465,11 @@ namespace wandaAPI.Services
                 originalTx.Frequency = dto.IsRecurring ? dto.Frequency?.ToLower() : null;
                 originalTx.End_date = dto.End_date;
 
-
                 await _transactionRepository.UpdateTransactionAsync(originalTx);
 
                 scope.Complete();
             }
         }
-
 
         //Ajusta el saldo. Comprueba si se trata de una diferencia positiva o negativa
         private async Task AdjustBalanceForUpdateAsync(Account account, string type, double difference)
