@@ -82,6 +82,8 @@ namespace wandaAPI.Services
                 int transId = await _transactionRepository.AddTransactionAsync(transaction);
                 transaction.Transaction_id = transId;
 
+                //Se crea una transaccion espejo en la cuenta personal que refleje el gasto que  se ha hecho en la conjunta
+
                 if (targetAccount.Account_id != fundingAccount.Account_id)
                 {
                     string espejoConcepto = dto.Split_type.ToLower() == "divided"
@@ -151,7 +153,7 @@ namespace wandaAPI.Services
         //Gestion de splits para la cuenta conjunta
         private async Task ProcessJointSplitsAsync(Models.Transaction tx, Account targetAccount, int transId, List<TransactionSplitDetailDTO>? customSplits)
         {
-            
+
             if (targetAccount.Account_type?.Trim().ToLower() == "joint" &&
                 tx.Transaction_type == "expense" &&
                 tx.Split_type == "divided")
@@ -169,7 +171,7 @@ namespace wandaAPI.Services
                             {
                                 Transaction_id = transId,
                                 User_id = splitDto.User_id,
-                                Amount_assigned = splitDto.Amount, 
+                                Amount_assigned = splitDto.Amount,
                                 Status = "pending"
                             };
                             await _splitRepository.AddAsync(split);
@@ -285,29 +287,63 @@ namespace wandaAPI.Services
         //2. DELETE
         public async Task DeleteAsync(int id)
         {
-
+          
             var tx = await _transactionRepository.GetTransactionAsync(id);
             if (tx == null) throw new KeyNotFoundException("La transacción no existe.");
 
+            // Verifica las deudas pagadas
+            if (tx.Split_type.ToLower() == "divided")
+            {
+             
+                var splits = await _splitRepository.GetByTransactionIdAsync(id);
+
+                // Si alguno está pagado, prohibimos borrar
+                if (splits.Any(s => s.Status.ToLower() == "settled"))
+                {
+                    throw new InvalidOperationException("No se puede eliminar este gasto porque uno o más usuarios ya han pagado su parte. Deben revertirse los pagos primero.");
+                }
+
+            }
 
             var targetAccount = await _accountRepository.GetByIdAsync(tx.Account_id);
             var fundingAccount = await ResolveFundingAccountAsync(targetAccount, tx.User_id);
 
-
             using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-
+                
                 await RevertBalanceEffectAsync(fundingAccount, tx);
 
-
+                
                 await RevertObjectiveEffectAsync(tx);
 
+                
                 await _transactionRepository.DeleteTransactionAsync(id);
+
+                //Borra la transaccion Espejo
+                if (targetAccount.Account_id != fundingAccount.Account_id)
+                {
+                    string espejoConcepto = tx.Split_type.ToLower() == "divided"
+                        ? $"(Gasto Compartido) {tx.Concept}"
+                        : $"(Aportación Conjunta) {tx.Concept}";
+
+                    
+                    var personalTxs = await _transactionRepository.GetTransactionsByAccountAsync(fundingAccount.Account_id);
+
+                    var mirrorTx = personalTxs.FirstOrDefault(t =>
+                        t.Amount == tx.Amount &&
+                        t.Transaction_date == tx.Transaction_date &&
+                        t.Concept == espejoConcepto
+                    );
+
+                    if (mirrorTx != null)
+                    {
+                        await _transactionRepository.DeleteTransactionAsync(mirrorTx.Transaction_id);
+                    }
+                }
 
                 scope.Complete();
             }
         }
-
 
         //Deshace el movimiento de dinero 
         private async Task RevertBalanceEffectAsync(Account account, Models.Transaction tx)
@@ -352,6 +388,11 @@ namespace wandaAPI.Services
 
             var originalTx = await _transactionRepository.GetTransactionAsync(id);
             if (originalTx == null) throw new KeyNotFoundException("La transacción no existe.");
+
+            if (originalTx.Split_type.ToLower() == "divided")
+            {
+                throw new InvalidOperationException("No es posible editar un gasto compartido. Por favor, elimínalo y créalo de nuevo con los datos correctos.");
+            }
 
 
             ValidateUpdateData(dto, originalTx);

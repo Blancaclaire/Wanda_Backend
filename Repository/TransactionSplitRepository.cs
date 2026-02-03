@@ -137,7 +137,7 @@ namespace wandaAPI.Repositories
             return splits;
         }
 
-        // Helper privado para no repetir el mapeo en cada método
+       
         private TransactionSplit MapReaderToSplit(SqlDataReader reader)
         {
             return new TransactionSplit
