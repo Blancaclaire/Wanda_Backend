@@ -2,6 +2,7 @@
 using wandaAPI.Repositories;
 using wandaAPI.Services;
 using System.Text.Json.Serialization;
+using wandaAPI.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("wandaDb"); 
@@ -19,6 +20,8 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITransactionSplitService, TransactionSplitService>();
+
+builder.Services.AddHostedService<RecurringTransactionWorker>();
 
 // Add services to the container.
 

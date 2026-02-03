@@ -5,6 +5,7 @@ public class TransactionCreateDTO
 
     public int User_id { get; set; }
     public int Objective_id { get; set; }
+    public int? Account_id { get; set; }
     public string Category { get; set; }
     public double Amount { get; set; }
     public string Transaction_type { get; set; } 

@@ -464,7 +464,7 @@ namespace wandaAPI.Services
 
         }
 
-         private void ValidateUpdateData(TransactionUpdateDTO dto, Models.Transaction originalTx)
+        private void ValidateUpdateData(TransactionUpdateDTO dto, Models.Transaction originalTx)
         {
 
             if (dto.Amount <= 0)
@@ -580,5 +580,86 @@ namespace wandaAPI.Services
             if (transaccion == null) throw new KeyNotFoundException("La transacción no existe.");
             return transaccion;
         }
+
+
+        //PROCESAR PAGOS RECURRENTES
+
+        //
+        public async Task ProcessRecurringTransactionsAsync()
+        {
+            var recurringTransactions = await _transactionRepository.GetRecurringTransactionsAsync();
+            var today = DateTime.Today;
+
+            foreach (var tx in recurringTransactions)
+            {
+                // 1. Determinar la fecha base para calcular la siguiente ejecución.
+                // Si nunca se ha ejecutado automáticamente, usamos la fecha de creación original.
+                DateTime lastRun = tx.Last_execution_date ?? tx.Transaction_date;
+                DateTime nextRunDate = DateTime.MinValue;
+
+                // 2. Calcular cuándo debería ser la próxima ejecución
+                switch (tx.Frequency?.ToLower())
+                {
+                    case "weekly":
+                        nextRunDate = lastRun.AddDays(7);
+                        break;
+                    case "monthly":
+                        nextRunDate = lastRun.AddMonths(1);
+                        break;
+                    case "annual":
+                        nextRunDate = lastRun.AddYears(1);
+                        break;
+                    default:
+                        continue; // Frecuencia no válida o nula
+                }
+
+                // 3. Si la fecha calculada es hoy o ya pasó (y no ha superado la fecha fin), ejecutamos.
+                // Usamos .Date para comparar solo fechas sin horas.
+                if (nextRunDate.Date <= today)
+                {
+                    // Verificamos de nuevo la fecha fin por seguridad
+                    if (tx.End_date.HasValue && nextRunDate.Date > tx.End_date.Value.Date)
+                        continue;
+
+                    try
+                    {
+                        // 4. Crear el DTO para la nueva transacción
+                        // IMPORTANTE: La nueva instancia NO es recurrente, es una instancia única.
+                        var newTransactionDto = new TransactionCreateDTO
+                        {
+                            User_id = tx.User_id,
+                            Account_id = tx.Account_id, // Usamos el ID original (CreateAsync resolverá si es conjunta)
+                            Objective_id = tx.Objective_id,
+                            Category = tx.Category,
+                            Amount = tx.Amount,
+                            Transaction_type = tx.Transaction_type,
+                            Concept = $"{tx.Concept} (Recurrente)", // Opcional: marcarla visualmente
+                            Transaction_date = DateTime.Now,
+                            IsRecurring = false, // La hija no se recurre a sí misma
+                            Frequency = null,
+                            End_date = null,
+                            Split_type = tx.Split_type,
+                            CustomSplits = null // Aquí podrías lógica para replicar splits manuales si fuera necesario
+                        };
+
+                        // 5. Ejecutar la creación reutilizando tu lógica central
+                        await CreateAsync(tx.Account_id, newTransactionDto);
+
+                        // 6. Actualizar la fecha de última ejecución en la transacción "Padre"
+                        // Esto evita que se ejecute múltiples veces el mismo día
+                        await _transactionRepository.UpdateLastExecutionAsync(tx.Transaction_id, DateTime.Now);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Loguear el error pero NO detener el bucle para otras transacciones
+                        Console.WriteLine($"Error procesando recurrencia ID {tx.Transaction_id}: {ex.Message}");
+                    }
+                }
+            }
+        }
+
+
+
+
     }
 }

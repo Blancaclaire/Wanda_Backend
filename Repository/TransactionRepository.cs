@@ -200,5 +200,56 @@ namespace wandaAPI.Repositories
             }
         }
 
+
+        
+        public async Task<List<Transaction>> GetRecurringTransactionsAsync()
+        {
+            var transactions = new List<Transaction>();
+
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                
+                string query = @"
+            SELECT transaction_id, account_id, user_id, objective_id, category, amount, 
+                   transaction_type, concept, transaction_date, isRecurring, frequency, 
+                   end_date, split_type, last_execution_date 
+            FROM TRANSACTIONS 
+            WHERE isRecurring = 1 
+            AND (end_date IS NULL OR end_date >= GETDATE())";
+
+                using (var command = new SqlCommand(query, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            transactions.Add(new Transaction
+                            {
+                                Transaction_id = reader.GetInt32(0),
+                                Account_id = reader.GetInt32(1),
+                                User_id = reader.GetInt32(2),
+                                Objective_id = reader.IsDBNull(3) ? 0 : reader.GetInt32(3),
+                                Category = reader.GetString(4),
+                                Amount = reader.IsDBNull(5) ? 0 : Convert.ToDouble(reader.GetDecimal(5)),
+                                Transaction_type = reader.GetString(6),
+                                Concept = reader.GetString(7),
+                                Transaction_date = reader.GetDateTime(8),
+                                IsRecurring = reader.GetBoolean(9),
+                                Frequency = reader.IsDBNull(10) ? null : reader.GetString(10),
+                                End_date = reader.IsDBNull(11) ? (DateTime?)null : reader.GetDateTime(11),
+                                Split_type = reader.GetString(12),
+                                Last_execution_date = reader.IsDBNull(13) ? (DateTime?)null : reader.GetDateTime(13)
+                            });
+                        }
+                    }
+                }
+            }
+            return transactions;
+        }
+
+
+
     }
 }

@@ -9,5 +9,7 @@ namespace wandaAPI.Services
         Task<Transaction> CreateAsync(int accountId, TransactionCreateDTO dto);
         Task UpdateAsync(int id, TransactionUpdateDTO dto);
         Task DeleteAsync(int id);
+
+        Task ProcessRecurringTransactionsAsync();
     }
 }
