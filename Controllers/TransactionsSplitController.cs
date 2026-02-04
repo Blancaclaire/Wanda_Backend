@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using wandaAPI.Services;
 using Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace wandaAPI.Controllers
 {
+    [Authorize]
     [Route("api")]
     [ApiController]
     public class TransactionSplitController : ControllerBase

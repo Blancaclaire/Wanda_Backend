@@ -21,6 +21,7 @@ namespace wandaAPI.Controllers
             _configuration = configuration;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<List<User>>> GetUsers()
 
@@ -31,6 +32,7 @@ namespace wandaAPI.Controllers
 
         }
 
+        [Authorize]
         [HttpGet("{userId}")]
         public async Task<ActionResult<User>> GetUserById(int userId)
         {
@@ -46,6 +48,7 @@ namespace wandaAPI.Controllers
             }
         }
 
+
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO user1)
         {
@@ -60,6 +63,7 @@ namespace wandaAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpPut("{userId}")]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateDTO updatedUser)
         {
@@ -87,6 +91,7 @@ namespace wandaAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpDelete("{userId}")]
         public async Task<IActionResult> DeleteUser(int userId)
         {

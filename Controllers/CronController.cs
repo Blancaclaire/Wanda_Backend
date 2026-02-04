@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using wandaAPI.Services;
 
@@ -17,6 +18,7 @@ namespace wandaAPI.Controllers
         }
 
         [HttpPost("execute")]
+        [AllowAnonymous]
         public async Task<IActionResult> ExecuteCron([FromHeader(Name = "X-Cron-Secret")] string secret)
         {
             // 1. Validar seguridad: Comparamos la clave recibida con la guardada en configuración
