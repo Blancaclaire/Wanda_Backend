@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using wandaAPI.Services;
 using Models;
 using DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace wandaAPI.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api")]
     public class TransactionController : ControllerBase

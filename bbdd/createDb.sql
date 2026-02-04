@@ -41,6 +41,7 @@ CREATE TABLE ACCOUNTS (
     creation_date DATETIME DEFAULT GETDATE() 
 );
 
+-- TABLA INTERMEDIA USUARIOS-CUENTAS (SIN ROLES)
 CREATE TABLE ACCOUNT_USERS (
     user_id INT NOT NULL,
     account_id INT NOT NULL,
@@ -78,7 +79,6 @@ CREATE TABLE TRANSACTIONS (
     end_date DATE NULL,
     split_type NVARCHAR(20) NOT NULL CHECK (split_type IN ('individual', 'contribution', 'divided')),
     
-    -- CAMBIO 1: Campo para controlar la ejecución del Cron sin duplicados
     last_execution_date DATETIME NULL,
     
     CONSTRAINT FK_Transactions_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE,
@@ -94,7 +94,6 @@ CREATE TABLE TRANSACTION_SPLITS (
     amount_assigned DECIMAL(18, 2) NOT NULL,
     status NVARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'settled')),
     
-    -- CAMBIO 2: Campo para registrar cuándo se pagó la deuda
     paid_at DATETIME NULL,
     
     CONSTRAINT FK_Splits_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
@@ -106,20 +105,25 @@ GO
 -- 3. CARGA DE DATOS INICIALES (SEEDING)
 -- =============================================
 
--- Usuarios 
-INSERT INTO USERS (name, email, password) VALUES ('Ana García', 'ana@wanda.com', 'hash_password_1');
-INSERT INTO USERS (name, email, password) VALUES ('Juan Pérez', 'juan@wanda.com', 'hash_password_2');
+-- Usuarios (Password: Wanda123!)
+INSERT INTO USERS (name, email, password) 
+VALUES ('Ana García', 'ana@wanda.com', '$2a$12$MQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ1.Gce3C');
+
+INSERT INTO USERS (name, email, password) 
+VALUES ('Juan Pérez', 'juan@wanda.com', '$2a$12$MQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ1.Gce3C');
 
 -- Cuentas 
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
 VALUES ('Ahorros Ana', 'personal', 1500.00, 100.00, 400.00); 
+
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
 VALUES ('Cuenta Juan', 'personal', 1200.00, 80.00, 350.00); 
 
-INSERT INTO ACCOUNTS (name, account_type, amount) 
-VALUES ('Casa Ana y Juan', 'joint', 500.00); 
+-- Cuenta conjunta (Sin saldo inicial)
+INSERT INTO ACCOUNTS (name, account_type) 
+VALUES ('Casa Ana y Juan', 'joint'); 
 
--- Relación Usuarios <-> Cuentas 
+-- Relación Usuarios <-> Cuentas (SIN ROLES)
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 1); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (2, 2); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 3); 
