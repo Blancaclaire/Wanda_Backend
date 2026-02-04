@@ -68,11 +68,13 @@ namespace wandaAPI.Services
                 throw new InvalidOperationException("La contraseña no contine al menos una mayuscula");
             }
 
+            string passwordHash = BCrypt.Net.BCrypt.HashPassword(user1.Password);
+
             var user = new User
             {
                 Name = user1.Name,
                 Email = user1.Email,
-                Password = user1.Password,
+                Password = passwordHash,
 
             };
 
