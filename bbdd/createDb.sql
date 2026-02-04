@@ -1,6 +1,3 @@
-
-
-
 -- =============================================
 -- 1. LIMPIEZA Y CREACIÓN DE LA BASE DE DATOS
 -- =============================================
@@ -81,6 +78,9 @@ CREATE TABLE TRANSACTIONS (
     end_date DATE NULL,
     split_type NVARCHAR(20) NOT NULL CHECK (split_type IN ('individual', 'contribution', 'divided')),
     
+    -- CAMBIO 1: Campo para controlar la ejecución del Cron sin duplicados
+    last_execution_date DATETIME NULL,
+    
     CONSTRAINT FK_Transactions_Account FOREIGN KEY (account_id) REFERENCES ACCOUNTS(account_id) ON DELETE CASCADE,
     CONSTRAINT FK_Transactions_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
     CONSTRAINT FK_Transactions_Objective FOREIGN KEY (objective_id) REFERENCES OBJECTIVES(objective_id) ON DELETE NO ACTION 
@@ -94,6 +94,9 @@ CREATE TABLE TRANSACTION_SPLITS (
     amount_assigned DECIMAL(18, 2) NOT NULL,
     status NVARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'settled')),
     
+    -- CAMBIO 2: Campo para registrar cuándo se pagó la deuda
+    paid_at DATETIME NULL,
+    
     CONSTRAINT FK_Splits_User FOREIGN KEY (user_id) REFERENCES USERS(user_id),
     CONSTRAINT FK_Splits_Transaction FOREIGN KEY (transaction_id) REFERENCES TRANSACTIONS(transaction_id) ON DELETE CASCADE
 );
@@ -103,11 +106,11 @@ GO
 -- 3. CARGA DE DATOS INICIALES (SEEDING)
 -- =============================================
 
--- Usuarios (se mantiene igual)
+-- Usuarios 
 INSERT INTO USERS (name, email, password) VALUES ('Ana García', 'ana@wanda.com', 'hash_password_1');
 INSERT INTO USERS (name, email, password) VALUES ('Juan Pérez', 'juan@wanda.com', 'hash_password_2');
 
--- Cuentas (se mantiene igual, creation_date usa el valor por defecto)
+-- Cuentas 
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
 VALUES ('Ahorros Ana', 'personal', 1500.00, 100.00, 400.00); 
 INSERT INTO ACCOUNTS (name, account_type, amount, weekly_budget, monthly_budget) 
@@ -116,18 +119,17 @@ VALUES ('Cuenta Juan', 'personal', 1200.00, 80.00, 350.00);
 INSERT INTO ACCOUNTS (name, account_type, amount) 
 VALUES ('Casa Ana y Juan', 'joint', 500.00); 
 
--- Relación Usuarios <-> Cuentas (Se ha eliminado la columna 'role')
--- SQL Server asignará automáticamente la fecha en 'joined_at'
+-- Relación Usuarios <-> Cuentas 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 1); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (2, 2); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (1, 3); 
 INSERT INTO ACCOUNT_USERS (user_id, account_id) VALUES (2, 3);
 
--- Objetivos de Ahorro (se mantiene igual)
+-- Objetivos de Ahorro
 INSERT INTO OBJECTIVES (account_id, name, target_amount, current_save, deadline)
 VALUES (1, 'Viaje Japón', 3000.00, 0.00, '2026-12-01');
 
--- Transacciones (se mantiene igual, transaction_date usa el valor por defecto)
+-- Transacciones 
 INSERT INTO TRANSACTIONS (account_id, user_id, category, objective_id, amount, transaction_type, concept, split_type)
 VALUES (1, 1, 'Ocio', 1, 100.00, 'saving', 'Aportación Japón', 'individual');
 
@@ -137,7 +139,7 @@ VALUES (3, 2, 'Hogar', 50.00, 'expense', 'Fibra Óptica', 'contribution');
 INSERT INTO TRANSACTIONS (account_id, user_id, category, amount, transaction_type, concept, split_type)
 VALUES (3, 1, 'Comida', 60.00, 'expense', 'Cena Viernes', 'divided'); 
 
--- Reparto de Gastos (se mantiene igual)
+-- Reparto de Gastos
 INSERT INTO TRANSACTION_SPLITS (user_id, transaction_id, amount_assigned, status)
 VALUES (1, 3, 30.00, 'settled');
 INSERT INTO TRANSACTION_SPLITS (user_id, transaction_id, amount_assigned, status)

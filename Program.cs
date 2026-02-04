@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using wandaAPI.Repositories;
 using wandaAPI.Services;
+using System.Text.Json.Serialization;
+using wandaAPI.Workers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,12 +31,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountUsersRepository, AccountUsersRepository>();
 builder.Services.AddScoped<IObjectiveRepository, ObjectiveRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ITransactionSplitRepository, TransactionSplitRepository>();
 
 //Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IObjectiveService, ObjectiveService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionSplitService, TransactionSplitService>();
 
+builder.Services.AddHostedService<RecurringTransactionWorker>();
 
 // Add services to the container.
 
@@ -43,13 +50,20 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.AllowAnyOrigin()    // Permite cualquier origen (Frontend)
-                  .AllowAnyMethod()    // Permite GET, POST, PUT, DELETE, etc.
-                  .AllowAnyHeader();   // Permite cualquier cabecera
+            policy.AllowAnyOrigin()    
+                  .AllowAnyMethod()    
+                  .AllowAnyHeader();   
         });
 });
+builder.Services.AddSwaggerGen(options =>
+{
+    options.CustomSchemaIds(type => type.FullName);
+});
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 

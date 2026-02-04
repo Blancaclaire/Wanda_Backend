@@ -1,18 +1,13 @@
 using Models;
 using wandaAPI.Repositories;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime;
+using DTOs; // Asegúrate de incluir el namespace de tus DTOs
 
 namespace wandaAPI.Services
 {
-
     public class AccountService : IAccountService
     {
-
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountUsersRepository _accountUsersRepository;
-
         private readonly IUserRepository _userRepository;
 
         public AccountService(IAccountRepository accountRepository, IAccountUsersRepository accountUsersRepository, IUserRepository userRepository)
@@ -28,7 +23,6 @@ namespace wandaAPI.Services
 
             if (string.IsNullOrWhiteSpace(dto.Name))
                 throw new ArgumentException("El nombre de la cuenta es obligatorio.");
-
 
             var allMemberIds = dto.Member_Ids ?? new List<int>();
             var uniqueMembers = allMemberIds.Distinct().ToList();
@@ -51,7 +45,7 @@ namespace wandaAPI.Services
             var jointAccount = new Account
             {
                 Name = dto.Name,
-                Account_Type = Account.AccountType.joint,
+                Account_type = "joint", 
                 Amount = 0,
                 Creation_date = DateTime.Now
             };
@@ -64,24 +58,21 @@ namespace wandaAPI.Services
                 {
                     User_id = userId,
                     Account_id = accountId
-            
                 });
             }
         }
 
         public async Task<int> AddPersonalAccountAsync(string userName)
         {
-
             if (string.IsNullOrWhiteSpace(userName))
             {
                 throw new ArgumentException("El nombre de usuario no puede estar vacío.", nameof(userName));
             }
 
-
             var personalAccount = new Account
             {
                 Name = userName,
-                Account_Type = Account.AccountType.personal,
+                Account_type = "personal", 
                 Amount = 0
             };
 
@@ -93,7 +84,6 @@ namespace wandaAPI.Services
             }
 
             return accountId;
-
         }
 
         public async Task DeleteAsync(int id)
@@ -109,57 +99,39 @@ namespace wandaAPI.Services
 
         public async Task<List<Account>> GetAllAsync()
         {
-            var accounts = await _accountRepository.GetAllAsync();
-            return accounts;
+            return await _accountRepository.GetAllAsync();
         }
 
         public async Task<Account?> GetByIdAsync(int id)
         {
             var account = await _accountRepository.GetByIdAsync(id);
-            if (account == null || account.Account_id < 0)
+            if (account == null) // Simplificado: si es null, no existe
             {
-                throw new KeyNotFoundException("El ID debe ser mayor que cero o no existe.");
+                throw new KeyNotFoundException("La cuenta no existe.");
             }
             return account;
         }
 
         public async Task UpdateAsync(int id, AccountUpdateDto accountDto)
         {
-            try
+            var existingAccount = await _accountRepository.GetByIdAsync(id);
+
+            if (existingAccount == null)
             {
-
-                var existingAccount = await _accountRepository.GetByIdAsync(id);
-
-                if (existingAccount == null)
-                {
-                    throw new KeyNotFoundException("La cuenta que se desea actualizar no existe.");
-                }
-
-                existingAccount.Name = accountDto.Name;
-                existingAccount.Weekly_budget = accountDto.Weekly_budget;
-                existingAccount.Monthly_budget = accountDto.Monthly_budget;
-                existingAccount.Account_picture_url = accountDto.Account_picture_url;
-
-                if (existingAccount.Account_Type == Account.AccountType.personal)
-                {
-                    existingAccount.Amount = accountDto.Amount;
-
-                }
-
-                await _accountRepository.UpdateAsync(existingAccount);
-
-            }
-            catch (ArgumentException ex)
-            {
-                throw new ArgumentException(ex.Message);
+                throw new KeyNotFoundException("La cuenta que se desea actualizar no existe.");
             }
 
-            catch (KeyNotFoundException ex)
-            {
+            existingAccount.Name = accountDto.Name;
+            existingAccount.Weekly_budget = accountDto.Weekly_budget;
+            existingAccount.Monthly_budget = accountDto.Monthly_budget;
+            existingAccount.Account_picture_url = accountDto.Account_picture_url;
 
-                throw new KeyNotFoundException(ex.Message);
+            if (existingAccount.Account_type == "personal")
+            {
+                existingAccount.Amount = accountDto.Amount;
             }
 
+            await _accountRepository.UpdateAsync(existingAccount);
         }
     }
 }

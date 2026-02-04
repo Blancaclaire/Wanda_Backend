@@ -42,8 +42,6 @@ namespace wandaAPI.Services
         public async Task AddAsync(UserCreateDTO user1)
         {
 
-            //Comprobaciones antes de añadir el user
-
             var users = await _userRepository.GetAllAsync();
             foreach (var us in users)
             {
@@ -78,10 +76,10 @@ namespace wandaAPI.Services
 
             };
 
-            //Añade el nuevo User a la tabla de USERS
+
             int userId = await _userRepository.AddAsync(user);
 
-            //Añade la nueva Account a partir de User a la tabla de ACCOUNTS
+
             int accountId = await _accountService.AddPersonalAccountAsync(user.Name);
 
             var accountUser = new AccountUsers
@@ -90,7 +88,7 @@ namespace wandaAPI.Services
                 Account_id = accountId
             };
 
-            //Añade en la tabla ACCOUNT_USERS el nuevo usuario y su nueva cuenta
+
             await _accountUsersRepository.AddAsync(accountUser);
 
         }
@@ -127,7 +125,7 @@ namespace wandaAPI.Services
             {
                 throw new ArgumentException(ex.Message);
             }
-            // Si el servicio no encontró el User para actualizar
+
             catch (KeyNotFoundException ex)
             {
 
@@ -138,30 +136,27 @@ namespace wandaAPI.Services
 
         public async Task DeleteAsync(int id)
         {
-            // 1. Verificar si el usuario existe
+
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
                 throw new KeyNotFoundException("El User no existe");
             }
 
-            // 2. Buscar y borrar la cuenta PERSONAL del usuario
-            // Necesitarás un método en el repositorio para encontrar la cuenta personal asociada al user_id
-            var accounts = await _accountService.GetAllAsync(); // O un método especializado
+  
+            var accounts = await _accountService.GetAllAsync();
+
             var personalAccount = accounts.FirstOrDefault(a =>
-                a.Account_Type == Account.AccountType.personal &&
-                a.Name == user.Name); // O mediante una consulta a ACCOUNT_USERS para mayor precisión
+                a.Account_type == "personal" &&
+                a.Name == user.Name);
 
             if (personalAccount != null)
             {
-                // Al borrar la cuenta, el ON DELETE CASCADE del SQL limpiará ACCOUNT_USERS para esta cuenta
+                
                 await _accountService.DeleteAsync(personalAccount.Account_id);
             }
 
-            // 3. Borrar el usuario
-            // El ON DELETE CASCADE que configuramos en SQL limpiará su participación en cuentas compartidas
             await _userRepository.DeleteAsync(id);
-
         }
 
     }

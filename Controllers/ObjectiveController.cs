@@ -7,7 +7,7 @@ using wandaAPI.Services;
 namespace wandaAPI.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api")]
     [ApiController]
     public class ObjectivesController : ControllerBase
     {
@@ -32,6 +32,32 @@ namespace wandaAPI.Controllers
             }
 
         }
+
+
+   
+        [HttpGet("objectives/{objectiveId}")]
+        public async Task<ActionResult<Objective>> GetById(int objectiveId)
+        {
+            
+            if (objectiveId <= 0) 
+                return BadRequest("El ID del objetivo no es válido.");
+
+            try
+            {            
+                var objective = await _service.GetByIdAsync(objectiveId);
+                
+                return Ok(objective);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
 
         [HttpPost("accounts/{accountId}/objectives")]
         public async Task<IActionResult> Create(int accountId, [FromBody] ObjectiveCreateDto dto)
